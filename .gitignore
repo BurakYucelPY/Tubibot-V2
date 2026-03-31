@@ -1,0 +1,16 @@
+# Python sanal ortamı
+venv/
+.venv/
+env/
+
+# Python derleme dosyaları
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Veritabanı dosyaları 
+data/vector_db/
+data/sql_db/*.db
+
+# Gizli dosyalar
+.env
