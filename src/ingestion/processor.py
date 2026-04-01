@@ -1,6 +1,6 @@
 import os
 from langchain_text_splitters import RecursiveCharacterTextSplitter
-from pdf_loader import load_pdfs
+from src.ingestion.pdf_loader import load_pdfs
 
 def process_and_chunk_documents(raw_documents):
     """
