@@ -7,7 +7,6 @@ from src.ingestion.pdf_loader import load_pdfs
 from src.ingestion.processor import process_and_chunk_documents
 from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_community.vectorstores import Chroma
-# İŞTE O HAYAT KURTARAN FİLTRE
 from langchain_community.vectorstores.utils import filter_complex_metadata
 
 def build_vector_database():
@@ -17,8 +16,8 @@ def build_vector_database():
     raw_docs = load_pdfs(raw_data_path)
     chunks = process_and_chunk_documents(raw_docs)
     
-    # --- KOORDİNAT TEMİZLİĞİ BURADA YAPILIYOR ---
-    print("[INFO] Karmaşık metadata verileri (piksel koordinatları vb.) filtreleniyor...")
+    # Kompleks metadata temizliği (piksel koordinatları vb.)
+    print("[INFO] Karmaşık metadata verileri filtreleniyor...")
     filtered_chunks = filter_complex_metadata(chunks)
     
     model_name = "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"
@@ -26,16 +25,27 @@ def build_vector_database():
     embeddings = HuggingFaceEmbeddings(model_name=model_name)
     
     persist_directory = "data/vector_db"
+    
+    # Eski veritabanını temizle (varsa)
+    if os.path.exists(persist_directory):
+        import shutil
+        print(f"[INFO] Eski vektör veritabanı siliniyor: {persist_directory}")
+        shutil.rmtree(persist_directory)
+        os.makedirs(persist_directory, exist_ok=True)
+    
     print("[INFO] Vektörler hesaplanıyor ve veritabanına kaydediliyor...")
     
-    # Veritabanına pis 'chunks' değil, temizlenmiş 'filtered_chunks' gidiyor
     vector_db = Chroma.from_documents(
         documents=filtered_chunks, 
         embedding=embeddings, 
         persist_directory=persist_directory
     )
     
-    print(f"\n[SUCCESS] İşlem tamamlandı! Toplam {len(filtered_chunks)} chunk vektörleştirilip '{persist_directory}' konumuna kalıcı olarak kaydedildi.")
+    # Doğrulama: metadata kontrolü
+    sample = vector_db.get(limit=3, include=["metadatas"])
+    print(f"\n[SUCCESS] Toplam {len(filtered_chunks)} chunk vektörleştirildi.")
+    print(f"[INFO] Örnek metadata: {sample['metadatas'][0] if sample['metadatas'] else 'Boş'}")
+    
     return vector_db
 
 if __name__ == "__main__":
