@@ -17,7 +17,8 @@ from langchain_core.documents import Document
 
 def _load_vector_db_and_docs():
     """ChromaDB'den vektör DB ve tüm dokümanları yükle."""
-    model_name = "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"
+    # Türkçe başarısı çok daha yüksek olan modele geçiş (Plan Adım 2)
+    model_name = "intfloat/multilingual-e5-large"
     embeddings = HuggingFaceEmbeddings(model_name=model_name)
     persist_directory = "data/vector_db"
     
