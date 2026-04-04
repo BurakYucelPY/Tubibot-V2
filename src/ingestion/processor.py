@@ -109,8 +109,10 @@ def process_and_chunk_documents(raw_documents):
         if heading:
             current_heading = heading
         
-        # Başlık bilgisini metadata'ya ekle
+        # Başlık bilgisini metadata'ya ekle ve bağlam kopukluğunu önlemek için doğrudan metnin içine yedir (Adım 4)
         chunk.metadata["section_heading"] = current_heading
+        chunk.page_content = f"[Ana Başlık/Bağlam: {current_heading}]\n{chunk.page_content}"
+        
         enriched_chunks.append(chunk)
     
     filtered_count = len(final_chunks) - len(enriched_chunks)
