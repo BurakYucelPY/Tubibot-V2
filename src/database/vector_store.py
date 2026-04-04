@@ -20,8 +20,8 @@ def build_vector_database():
     print("[INFO] Karmaşık metadata verileri filtreleniyor...")
     filtered_chunks = filter_complex_metadata(chunks)
     
-    model_name = "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"
-    print(f"\n[INFO] Embedding modeli yükleniyor: {model_name}")
+    model_name = "intfloat/multilingual-e5-large"
+    print(f"\n[INFO] (TÜRKÇE ODAKLI) Embedding modeli yükleniyor: {model_name}")
     embeddings = HuggingFaceEmbeddings(model_name=model_name)
     
     persist_directory = "data/vector_db"
