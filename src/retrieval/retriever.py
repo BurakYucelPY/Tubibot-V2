@@ -7,6 +7,7 @@ from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_chroma import Chroma
 from langchain_community.retrievers import BM25Retriever
 from langchain_core.documents import Document
+from TurkishStemmer import TurkishStemmer
 
 # ====================================================================
 # Gelişmiş Retriever Pipeline:
@@ -41,26 +42,27 @@ def _load_vector_db_and_docs():
     return vector_db, embeddings, documents
 
 
-def _merge_results(vector_docs, bm25_docs, vector_weight=0.6, bm25_weight=0.4):
+def _merge_results(vector_docs, bm25_docs):
     """
     İki retriever'ın sonuçlarını birleştir ve deduplicate et.
-    Reciprocal Rank Fusion (RRF) benzeri basit bir skor birleştirme.
+    Reciprocal Rank Fusion (RRF) (k=60) ile adil skor birleştirme.
     """
     doc_scores = {}  # page_content hash -> (score, doc)
+    K = 60
     
-    # Vektör sonuçları (sıralamaya göre skor ver)
+    # Vektör sonuçları (sıralamaya göre RRF)
     for rank, doc in enumerate(vector_docs):
         key = hash(doc.page_content)
-        score = vector_weight * (1.0 / (rank + 1))
+        score = 1.0 / (K + rank)
         if key in doc_scores:
             doc_scores[key] = (doc_scores[key][0] + score, doc)
         else:
             doc_scores[key] = (score, doc)
     
-    # BM25 sonuçları (sıralamaya göre skor ver)
+    # BM25 sonuçları (sıralamaya göre RRF)
     for rank, doc in enumerate(bm25_docs):
         key = hash(doc.page_content)
-        score = bm25_weight * (1.0 / (rank + 1))
+        score = 1.0 / (K + rank)
         if key in doc_scores:
             doc_scores[key] = (doc_scores[key][0] + score, doc)
         else:
@@ -80,8 +82,19 @@ def get_retriever():
     # 1. Vektör (Semantic) Retriever
     vector_retriever = vector_db.as_retriever(search_kwargs={"k": 10})
     
+    # Türkçe Kök Bulma Ön İşlemcisi
+    stemmer = TurkishStemmer()
+    
+    def turkish_preprocessor(text):
+        tokens = text.lower().split()
+        return [stemmer.stem(t) for t in tokens]
+    
     # 2. BM25 (Keyword) Retriever
-    bm25_retriever = BM25Retriever.from_documents(all_documents, k=10)
+    bm25_retriever = BM25Retriever.from_documents(
+        all_documents, 
+        k=10,
+        preprocess_func=turkish_preprocessor
+    )
     
     class HybridRetriever:
         """BM25 + Vektör arama birleşimi (RRF)."""
@@ -92,7 +105,8 @@ def get_retriever():
             self.top_k = top_k
         
         def invoke(self, query, config=None):
-            vector_results = self.vector_ret.invoke(query)
+            prefixed_query = f"query: {query}"
+            vector_results = self.vector_ret.invoke(prefixed_query)
             bm25_results = self.bm25_ret.invoke(query)
             merged = _merge_results(vector_results, bm25_results)
             return merged[:self.top_k]
