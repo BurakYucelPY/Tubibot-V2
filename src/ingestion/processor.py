@@ -89,9 +89,26 @@ def process_and_chunk_documents(raw_documents):
         # Metinler: uygun splitter ile böl
         if doc_groups["texts"]:
             splitter = _get_splitter_for_doc_type(doc_type)
-            split_texts = splitter.split_documents(doc_groups["texts"])
             
-            print(f"  [{doc_type}] {len(doc_groups['texts'])} metin → {len(split_texts)} chunk (size={splitter._chunk_size})")
+            # Parça parça (örneğin madde madde) gelen küçük metinleri kaynak dosya bazında organik olarak birleştir
+            # Bu sayede 41 maddelik bir liste ayrı ayrı değil, tam ve anlamlı bloklar halinde kalır.
+            from langchain_core.documents import Document
+            docs_by_source = {}
+            for doc in doc_groups["texts"]:
+                src = doc.metadata.get("source", "unknown")
+                if src not in docs_by_source:
+                    docs_by_source[src] = {"text": [], "metadata": doc.metadata.copy()}
+                # Liste maddelerini veya paragrafları \n ile birleştir
+                docs_by_source[src]["text"].append(doc.page_content)
+            
+            merged_docs = []
+            for src, data in docs_by_source.items():
+                joined_text = "\n".join(data["text"])
+                merged_docs.append(Document(page_content=joined_text, metadata=data["metadata"]))
+                
+            split_texts = splitter.split_documents(merged_docs)
+            
+            print(f"  [{doc_type}] {len(doc_groups['texts'])} metin parçası birleştirilerek \u2192 {len(split_texts)} chunk yapıldı (size={splitter._chunk_size})")
             final_chunks.extend(split_texts)
     
     # Aşama 3: Başlık bilgisi ekleme & kısa chunk filtreleme
@@ -100,8 +117,12 @@ def process_and_chunk_documents(raw_documents):
     current_heading = "Genel"
     
     for chunk in final_chunks:
-        # Çok kısa chunk'ları filtrele (noise)
-        if len(chunk.page_content.strip()) < 50:
+        # Çok kısa chunk'ları filtrele (noise), ancak bazı belgelerdeki kısa maddelerin
+        # (Örn: Öncelikli Alanlar'daki 3-5 kelimelik liste elemanları) silinmesini engelle.
+        doc_type = chunk.metadata.get("document_type", "")
+        min_length = 15 if doc_type == "oncelikli_alanlar" else 50
+        
+        if len(chunk.page_content.strip()) < min_length:
             continue
         
         # Başlık tespiti
@@ -109,9 +130,14 @@ def process_and_chunk_documents(raw_documents):
         if heading:
             current_heading = heading
         
-        # Başlık bilgisini metadata'ya ekle ve bağlam kopukluğunu önlemek için doğrudan metnin içine yedir (Adım 4)
+        # Seçenek 1: Her parçaya "Künye" (Title / Metadata Injection) ekleme
+        # Metnin içine, o metnin HANGİ BELGEDEN geldiğini gizilce ekliyoruz.
+        # Böylece "Tübitak", "2209", "Öncelikli Alan" kelimeleri her chunk'ta garanti bulunacak.
+        source_name = chunk.metadata.get("source_document", "TÜBİTAK 2209-A")
+        
+        # Başlık bilgisini metadata'ya ekle ve bağlam kopukluğunu önlemek için doğrudan metnin içine yedir
         chunk.metadata["section_heading"] = current_heading
-        chunk.page_content = f"[Ana Başlık/Bağlam: {current_heading}]\n{chunk.page_content}"
+        chunk.page_content = f"passage: [Belge Kaynağı: {source_name} | Alt Başlık: {current_heading}]\nMadde/İçerik: {chunk.page_content}"
         
         enriched_chunks.append(chunk)
     
