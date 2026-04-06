@@ -21,7 +21,17 @@ PDF_METADATA_MAP = {
         "document_type": "oncelikli_alanlar",
         "year": "2025",
     },
+    "Öncelikli Alanlar.pdf": {
+        "source_document": "2025 Öncelikli Alanlar Listesi",
+        "document_type": "oncelikli_alanlar",
+        "year": "2025",
+    },
     "SKA Kapsamı ve Göstergeleri.pdf": {
+        "source_document": "Sürdürülebilir Kalkınma Amaçları Kapsamı ve Göstergeleri",
+        "document_type": "ska_rehberi",
+        "year": "",
+    },
+    "SKA_Surdurulebilir_Kalkinma.pdf": {
         "source_document": "Sürdürülebilir Kalkınma Amaçları Kapsamı ve Göstergeleri",
         "document_type": "ska_rehberi",
         "year": "",
@@ -54,24 +64,14 @@ def load_pdfs(directory_path):
             file_path = os.path.join(directory_path, filename)
             extra_metadata = _get_metadata_for_file(filename)
             
-            # EĞER DOSYA SKA REHBERİ İSE: Satır satır okuyan PyPDF kullan
-            if "SKA" in filename or "Göstergeleri" in filename:
-                print(f"--- {filename} [PyPDF] ile okunuyor (Satır koruma modu)... ---")
-                loader = PyPDFLoader(file_path)
-                data = loader.load()
-                for d in data:
-                    d.metadata["category"] = "NarrativeText"
-                    d.metadata.update(extra_metadata)
-                documents.extend(data)
-                
-            # EĞER DOSYA TÜBİTAK FORMUYSA: Tabloları çözen Unstructured kullan
-            else:
-                print(f"--- {filename} [Unstructured] ile okunuyor (Tablo/Başlık modu)... ---")
-                loader = UnstructuredPDFLoader(file_path, mode="elements", languages=["tur"])
-                data = loader.load()
-                for d in data:
-                    d.metadata.update(extra_metadata)
-                documents.extend(data)
+            # Artık tüm belgeler temiz (Word/PDF düz formunda) olduğu için 
+            # başlık ve madde ayrımlarını daha iyi anlaması adına hepsini Unstructured ile okuyoruz.
+            print(f"--- {filename} [Unstructured] ile okunuyor (Tablo/Başlık modu)... ---")
+            loader = UnstructuredPDFLoader(file_path, mode="elements", languages=["tur"])
+            data = loader.load()
+            for d in data:
+                d.metadata.update(extra_metadata)
+            documents.extend(data)
             
     print(f"Toplam {len(documents)} veri parçası çıkarıldı.")
     return documents
