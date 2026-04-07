@@ -21,7 +21,7 @@ def _load_vector_db_and_docs():
     # Türkçe başarısı çok daha yüksek olan modele geçiş (Plan Adım 2)
     model_name = "intfloat/multilingual-e5-large"
     embeddings = HuggingFaceEmbeddings(model_name=model_name)
-    persist_directory = "data/vector_db"
+    persist_directory = "backend/data/vector_db"
     
     vector_db = Chroma(
         persist_directory=persist_directory,

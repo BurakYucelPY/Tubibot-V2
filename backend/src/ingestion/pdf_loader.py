@@ -78,7 +78,7 @@ def load_pdfs(directory_path):
 
 
 if __name__ == "__main__":
-    raw_data_path = "data/2209A_pdf"
+    raw_data_path = "backend/data/2209A_pdf"
     all_docs = load_pdfs(raw_data_path)
     
     # Metadata doğrulama

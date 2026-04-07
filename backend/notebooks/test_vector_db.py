@@ -18,7 +18,7 @@ def test_vector_db_metadata():
     from langchain_chroma import Chroma
     
     embeddings = HuggingFaceEmbeddings(model_name="intfloat/multilingual-e5-large")
-    vector_db = Chroma(persist_directory="data/vector_db", embedding_function=embeddings)
+    vector_db = Chroma(persist_directory="backend/data/vector_db", embedding_function=embeddings)
     
     sample = vector_db.get(limit=10, include=["metadatas"])
     

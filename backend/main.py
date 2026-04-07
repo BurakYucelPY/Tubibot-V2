@@ -94,7 +94,7 @@ if __name__ == "__main__":
     
     # Test soruları
     test_questions = [
-        "Sulardaki yaşamı korumak için bir sümilasyon ile alakalı bir proje yapacağım. Sence bu hangi SKA kapsamına girer ve tübitak öncelikli alanlardan hangisine girebilir?"]
+        "Tübitak öncelikli alanlar nelerdir?"]
     
     for soru in test_questions:
         print(f"\n[KULLANICI]: {soru}\n")
