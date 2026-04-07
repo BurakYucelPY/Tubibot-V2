@@ -149,7 +149,7 @@ def process_and_chunk_documents(raw_documents):
 
 
 if __name__ == "__main__":
-    raw_data_path = "data/raw_pdf"
+    raw_data_path = "data/2209A_pdf"
     print("[INFO] PDF yükleme işlemi başlatılıyor...")
     raw_docs = load_pdfs(raw_data_path)
     
