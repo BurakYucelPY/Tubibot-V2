@@ -16,12 +16,12 @@ def test_metadata_enrichment():
     print("="*60)
     from src.ingestion.pdf_loader import PDF_METADATA_MAP, _get_metadata_for_file
     
-    # 5 PDF'in hepsi mapping'de olmalı
+    # Yeni PDF'lerin mapping'de olmalı
     expected_files = [
-        "2209-A_2025_Yili_Cagri_Duyurusu_09102025.pdf",
+        "2209-A_2025_Cagri_Duyurusu.pdf",
         "2209-A_arastirma_onerisi_formu_09102025.pdf",
-        "Oncelikli_Alanlar_2025-2.pdf",
-        "SKA Kapsamı ve Göstergeleri.pdf",
+        "Öncelikli Alanlar.pdf",
+        "SKA_Surdurulebilir_Kalkinma.pdf",
         "kimlerbasvurur.pdf"
     ]
     
