@@ -11,8 +11,9 @@ __pycache__/
 # Veritabanı dosyaları 
 data/vector_db/
 data/sql_db/*.db
-data/raw_pdf/
+data/2209A_pdf/
 data/processed/
-
+data/TübitakBilgi_pdf/
+data/TübitakYazma_pdf/
 # Gizli dosyalar
 .env
