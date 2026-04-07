@@ -12,7 +12,7 @@ from langchain_community.vectorstores.utils import filter_complex_metadata
 def build_vector_database():
     print("\n[INFO] Vektör Veritabanı (Vector DB) inşa süreci başlatılıyor...")
     
-    raw_data_path = "data/raw_pdf"
+    raw_data_path = "data/2209A_pdf"
     raw_docs = load_pdfs(raw_data_path)
     chunks = process_and_chunk_documents(raw_docs)
     
