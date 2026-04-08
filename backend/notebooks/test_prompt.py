@@ -38,15 +38,15 @@ def test_prompt_and_sources():
     print(f"  {PASS if has_content else FAIL} İçerik korunuyor")
     
     # Prompt'ta kritik kurallar var mı
-    has_hallucination_guard = "uydurma" in RAG_SYSTEM_PROMPT.lower() or "asla" in RAG_SYSTEM_PROMPT.lower()
-    has_cot = "analiz" in RAG_SYSTEM_PROMPT.lower() or "kapsam" in RAG_SYSTEM_PROMPT.lower() or "adım" in RAG_SYSTEM_PROMPT.lower()
-    has_format = "eksiksiz" in RAG_SYSTEM_PROMPT.lower() or "liste" in RAG_SYSTEM_PROMPT.lower()
-    
+    has_hallucination_guard = "uydurma" in RAG_SYSTEM_PROMPT.lower()
+    has_no_source_ref = "kaynak" in RAG_SYSTEM_PROMPT.lower() and "referans" in RAG_SYSTEM_PROMPT.lower()
+    has_context_placeholder = "{context}" in RAG_SYSTEM_PROMPT
+
     print(f"  {PASS if has_hallucination_guard else FAIL} Hallüsinasyon koruması prompt'ta var")
-    print(f"  {PASS if has_cot else FAIL} Chain-of-Thought talimatı var")
-    print(f"  {PASS if has_format else FAIL} Yapılandırılmış cevap formatı talimatı var")
-    
-    result = has_separator and has_content and has_hallucination_guard and has_cot and has_format
+    print(f"  {PASS if has_no_source_ref else FAIL} Kaynak/referans belirtmeme kuralı var")
+    print(f"  {PASS if has_context_placeholder else FAIL} Bağlam placeholder'ı ({{context}}) var")
+
+    result = has_separator and has_content and has_hallucination_guard and has_no_source_ref and has_context_placeholder
     print(f"\n  {'🎉 TEST BAŞARILI!' if result else '⚠️ TEST BAŞARISIZ!'}")
     return result
 
