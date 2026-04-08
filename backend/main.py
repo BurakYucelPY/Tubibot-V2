@@ -26,8 +26,9 @@ QUERY_EXPANSION_PROMPT = ChatPromptTemplate.from_messages([
                "   - SKA -> Sürdürülebilir Kalkınma Amaçları (SKA)\n"
                "   - 2209-A -> TÜBİTAK 2209-A\n"
                "3. Kendi bilginden ek anahtar kelime, konu veya alan EKLEME.\n"
-               "4. Çıktın en fazla 30 kelime olmalı ve soru işaretiyle bitmeli.\n"
-               "5. Sorunun niyetini DEĞİŞTİRME."),
+               "4. Soruda birden fazla alt soru veya konu varsa HEPSİNİ koru. Hiçbir kısmı silme, birleştirme veya başka bir şeyle değiştirme.\n"
+               "5. Sorunun niyetini DEĞİŞTİRME.\n"
+               "6. Yazım hatalarını düzelt (ör: 'ypamayı' -> 'yapmayı')."),
     ("human", "{question}")
 ])
 
@@ -38,8 +39,9 @@ Aşağıda verilen "Bağlam" (Context) metinlerini kullanarak soruyu detaylıca 
 KURALLAR:
 1. SADECE ve SADECE bağlamda bulunan bilgileri kullan. Kendi dış bilginle (örneğin bağlamda geçmeyen 14.1.1, 6.1.1 gibi alt gösterge numaraları uydurarak) ASLA ekleme veya yorum yapma.
 2. Bağlamda cevap yoksa sadece: "Bu bilgiye mevcut TÜBİTAK belgelerinde ulaşamadım." de.
-3. SKA hedefleri (Örn: Hedef 14.1, Hedef 14.2 vb.) soruluyorsa, bu maddeleri bağlamda yazan orijinal haliyle EKSİKSİZ, NOKTASI VİRGÜLÜNE, KISALTMADAN ve ÖZETLEMEDEN listeleyeceksin. Yarım yamalak bilgi verme.
+3. SKA hedefleri (Örn: Hedef 14.1, Hedef 14.2 vb.) soruluyorsa, bu maddeleri bağlamda yazan orijinal haliyle EKSİKSİZ, KISALTMADAN ve ÖZETLEMEDEN listeleyeceksin. Yarım yamalak bilgi verme.
 4. Çıktında HİÇBİR ŞEKİLDE kaynak, belge numarası veya referans (Örn: [Kaynak 1]) belirtme.
+5. Hedef/madde metinlerini aktarırken, metin içinde geçen diğer belgelere yapılan dahili atıfları (örn: "'İstediğimiz Gelecek' belgesinin 158. paragrafında belirtildiği üzere", "BM Kararı No: ...") ÇIKAR ve sadece hedefin asıl içeriğini yaz.
 
 BAĞLAM:
 {context}"""
@@ -108,7 +110,7 @@ if __name__ == "__main__":
     
     # Test soruları
     test_questions = [
-        "Tübitak öncelikli alanlar nelerdir?"]
+        "Sulardaki yaşamı korumaya yönelik bir proje ypamayı düşünüyorum. Hangi SKA kapsamı ve hedeflerine girebilir bu proje. Ekstra olarak öncelikli alanlara girer mi?"]
     
     for soru in test_questions:
         print(f"\n[KULLANICI]: {soru}\n")
