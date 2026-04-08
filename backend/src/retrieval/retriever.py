@@ -144,13 +144,33 @@ def get_retriever():
     reranker = CrossEncoder("BAAI/bge-reranker-v2-m3")
 
     class HybridRetriever:
-        """BM25 + Vektör (RRF) + metadata boost + cross-encoder reranking."""
+        """BM25 + Vektör (RRF) + metadata boost + cross-encoder reranking + sibling expansion."""
 
-        def __init__(self, vector_ret, bm25_ret, reranker_model, top_k=8):
+        def __init__(self, vector_ret, bm25_ret, reranker_model, all_docs, top_k=8):
             self.vector_ret = vector_ret
             self.bm25_ret = bm25_ret
             self.reranker = reranker_model
+            self.all_docs = all_docs
             self.top_k = top_k
+
+        def _expand_siblings(self, results, max_total=12):
+            """
+            Sonuçlardaki belgelerin kardeş chunk'larını dahil et.
+            Bir belgenin bir chunk'ı bulunduysa, aynı source_document'tan
+            diğer chunk'ları da ekle — liste/tablo bütünlüğünü sağlar.
+            """
+            existing_keys = {hash(d.page_content) for d in results}
+            sources_in_results = {d.metadata.get("source_document") for d in results}
+
+            siblings = []
+            for doc in self.all_docs:
+                src = doc.metadata.get("source_document")
+                key = hash(doc.page_content)
+                if src in sources_in_results and key not in existing_keys:
+                    siblings.append(doc)
+                    existing_keys.add(key)
+
+            return (results + siblings)[:max_total]
 
         def invoke(self, query, config=None):
             # E5Embeddings "query: " prefix'ini otomatik ekler
@@ -176,14 +196,18 @@ def get_retriever():
                 pairs = [[query, doc.page_content] for doc in candidates]
                 scores = self.reranker.predict(pairs)
                 scored_docs = sorted(zip(scores, candidates), key=lambda x: x[0], reverse=True)
-                return [doc for _, doc in scored_docs[:self.top_k]]
+                results = [doc for _, doc in scored_docs[:self.top_k]]
+            else:
+                results = merged[:self.top_k]
 
-            return merged[:self.top_k]
+            # Sibling expansion: aynı belgeden eksik chunk'ları dahil et
+            results = self._expand_siblings(results)
+            return results
 
         def get_relevant_documents(self, query):
             return self.invoke(query)
 
-    return HybridRetriever(vector_retriever, bm25_retriever, reranker, top_k=8)
+    return HybridRetriever(vector_retriever, bm25_retriever, reranker, all_documents, top_k=8)
 
 
 if __name__ == "__main__":
