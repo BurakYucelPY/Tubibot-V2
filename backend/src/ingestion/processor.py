@@ -1,6 +1,7 @@
 import os
 import re
 from langchain_text_splitters import RecursiveCharacterTextSplitter
+from langchain_core.documents import Document
 from src.ingestion.pdf_loader import load_pdfs
 
 # ====================================================================
@@ -50,101 +51,143 @@ def process_and_chunk_documents(raw_documents):
     """
     Ham belgeleri filtreler ve RAG sistemi için chunk'lara böler.
     - Gürültü filtreleme
-    - Belge türüne göre farklı chunk boyutları
-    - Başlık tespiti ve metadata ekleme
+    - Bölüm farkındalıklı (section-aware) chunking
+    - Başlık tespiti ve metadata ekleme (belge bazında izole)
     - Çok kısa chunk filtreleme
     """
+    # ================================================================
+    # Aşama 1: Gürültü Filtreleme
+    # ================================================================
     cleaned_documents = []
-    
+
     print("\n[INFO] Aşama 1: Veri Filtreleme (Noise Reduction) Başlatıldı.")
     for doc in raw_documents:
         category = doc.metadata.get("category", "")
         if category in ["Header", "Footer", "PageBreak", "UncategorizedText"]:
             continue
         cleaned_documents.append(doc)
-        
+
     print(f"[INFO] Filtreleme tamamlandı: {len(raw_documents)} ham belgeden {len(cleaned_documents)} geçerli belge elde edildi.")
 
-    print("\n[INFO] Aşama 2: Metin Parçalama (Akıllı Chunking) Başlatıldı.")
-    
+    # ================================================================
+    # Aşama 2: Bölüm Farkındalıklı (Section-Aware) Chunking
+    # Her belge kaynağı bağımsız işlenir — heading sızıntısı önlenir.
+    # ================================================================
+    print("\n[INFO] Aşama 2: Bölüm Farkındalıklı Chunking Başlatıldı.")
+
     final_chunks = []
-    
+
     # Belge türüne göre grupla
     docs_by_type = {}
     for doc in cleaned_documents:
         doc_type = doc.metadata.get("document_type", "default")
         if doc_type not in docs_by_type:
             docs_by_type[doc_type] = {"tables": [], "texts": []}
-        
+
         if doc.metadata.get("category") == "Table":
             docs_by_type[doc_type]["tables"].append(doc)
         else:
             docs_by_type[doc_type]["texts"].append(doc)
-    
-    # Her belge türü için farklı splitter ile chunk'la
+
     for doc_type, doc_groups in docs_by_type.items():
         # Tablolar: doğrudan ekle (bölme yok)
-        final_chunks.extend(doc_groups["tables"])
-        
-        # Metinler: uygun splitter ile böl
-        if doc_groups["texts"]:
-            splitter = _get_splitter_for_doc_type(doc_type)
-            
-            # Parça parça (örneğin madde madde) gelen küçük metinleri kaynak dosya bazında organik olarak birleştir
-            # Bu sayede 41 maddelik bir liste ayrı ayrı değil, tam ve anlamlı bloklar halinde kalır.
-            from langchain_core.documents import Document
-            docs_by_source = {}
-            for doc in doc_groups["texts"]:
-                src = doc.metadata.get("source", "unknown")
-                if src not in docs_by_source:
-                    docs_by_source[src] = {"text": [], "metadata": doc.metadata.copy()}
-                # Liste maddelerini veya paragrafları \n ile birleştir
-                docs_by_source[src]["text"].append(doc.page_content)
-            
-            merged_docs = []
-            for src, data in docs_by_source.items():
-                joined_text = "\n".join(data["text"])
-                merged_docs.append(Document(page_content=joined_text, metadata=data["metadata"]))
-                
-            split_texts = splitter.split_documents(merged_docs)
-            
-            print(f"  [{doc_type}] {len(doc_groups['texts'])} metin parçası birleştirilerek \u2192 {len(split_texts)} chunk yapıldı (size={splitter._chunk_size})")
-            final_chunks.extend(split_texts)
-    
-    # Aşama 3: Başlık bilgisi ekleme & kısa chunk filtreleme
-    print("\n[INFO] Aşama 3: Başlık Tespiti ve Kısa Chunk Filtreleme.")
+        for table_doc in doc_groups["tables"]:
+            table_doc.metadata["section_heading"] = "Tablo"
+            final_chunks.append(table_doc)
+
+        if not doc_groups["texts"]:
+            continue
+
+        splitter = _get_splitter_for_doc_type(doc_type)
+
+        # Kaynak dosya bazında grupla
+        docs_by_source = {}
+        for doc in doc_groups["texts"]:
+            src = doc.metadata.get("source", "unknown")
+            if src not in docs_by_source:
+                docs_by_source[src] = []
+            docs_by_source[src].append(doc)
+
+        type_chunk_count = 0
+
+        # Düz liste belgeler (örn: öncelikli alanlar) için section splitting YAPMA
+        # Tüm elementleri tek blok olarak birleştir, sonra text splitter'a ver.
+        skip_section_split = doc_type in ("oncelikli_alanlar",)
+
+        for src, source_docs in docs_by_source.items():
+            base_metadata = source_docs[0].metadata.copy()
+
+            if skip_section_split:
+                # Tüm elementleri tek blok olarak birleştir
+                joined_text = "\n".join(doc.page_content for doc in source_docs)
+                merged_doc = Document(page_content=joined_text, metadata=base_metadata)
+                merged_doc.metadata["section_heading"] = "Genel"
+
+                chunks = splitter.split_documents([merged_doc])
+                for chunk in chunks:
+                    chunk.metadata["section_heading"] = "Genel"
+
+                final_chunks.extend(chunks)
+                type_chunk_count += len(chunks)
+                continue
+
+            # Diğer belge türleri: bölüm başlıklarına göre grupla
+            section_groups = []  # [(heading, [element_texts], base_metadata)]
+            current_heading = "Genel"
+            current_texts = []
+
+            for doc in source_docs:
+                heading = _detect_heading(doc.page_content)
+                if heading:
+                    # Önceki bölümü kaydet
+                    if current_texts:
+                        section_groups.append((current_heading, current_texts, base_metadata.copy()))
+                    current_heading = heading
+                    current_texts = [doc.page_content]
+                else:
+                    current_texts.append(doc.page_content)
+
+            # Son bölümü kaydet
+            if current_texts:
+                section_groups.append((current_heading, current_texts, base_metadata.copy()))
+
+            # Her bölüm grubunu bağımsız olarak chunk'la
+            for heading, texts, metadata in section_groups:
+                joined_text = "\n".join(texts)
+                section_doc = Document(page_content=joined_text, metadata=metadata)
+                section_doc.metadata["section_heading"] = heading
+
+                chunks = splitter.split_documents([section_doc])
+
+                # Her chunk'a bölüm başlığını ata
+                for chunk in chunks:
+                    chunk.metadata["section_heading"] = heading
+
+                final_chunks.extend(chunks)
+                type_chunk_count += len(chunks)
+
+        print(f"  [{doc_type}] {len(doc_groups['texts'])} metin parçası -> {type_chunk_count} chunk (size={splitter._chunk_size})")
+
+    # ================================================================
+    # Aşama 3: Kısa Chunk Filtreleme (gürültü temizliği)
+    # page_content'e metadata injection YAPILMAZ — temiz metin kalır.
+    # ================================================================
+    print("\n[INFO] Aşama 3: Kısa Chunk Filtreleme.")
     enriched_chunks = []
-    current_heading = "Genel"
-    
+
     for chunk in final_chunks:
-        # Çok kısa chunk'ları filtrele (noise), ancak bazı belgelerdeki kısa maddelerin
-        # (Örn: Öncelikli Alanlar'daki 3-5 kelimelik liste elemanları) silinmesini engelle.
         doc_type = chunk.metadata.get("document_type", "")
         min_length = 15 if doc_type == "oncelikli_alanlar" else 50
-        
+
         if len(chunk.page_content.strip()) < min_length:
             continue
-        
-        # Başlık tespiti
-        heading = _detect_heading(chunk.page_content)
-        if heading:
-            current_heading = heading
-        
-        # Seçenek 1: Her parçaya "Künye" (Title / Metadata Injection) ekleme
-        # Metnin içine, o metnin HANGİ BELGEDEN geldiğini gizilce ekliyoruz.
-        # Böylece "Tübitak", "2209", "Öncelikli Alan" kelimeleri her chunk'ta garanti bulunacak.
-        source_name = chunk.metadata.get("source_document", "TÜBİTAK 2209-A")
-        
-        # Başlık bilgisini metadata'ya ekle ve bağlam kopukluğunu önlemek için doğrudan metnin içine yedir
-        chunk.metadata["section_heading"] = current_heading
-        chunk.page_content = f"passage: [Belge Kaynağı: {source_name} | Alt Başlık: {current_heading}]\nMadde/İçerik: {chunk.page_content}"
-        
+
         enriched_chunks.append(chunk)
-    
+
     filtered_count = len(final_chunks) - len(enriched_chunks)
     print(f"[INFO] {filtered_count} kısa/boş chunk filtrelendi.")
     print(f"[INFO] İşlem tamamlandı. Toplam {len(enriched_chunks)} kaliteli chunk oluşturuldu.")
-    
+
     return enriched_chunks
 
 
@@ -152,9 +195,9 @@ if __name__ == "__main__":
     raw_data_path = "backend/data/2209A_pdf"
     print("[INFO] PDF yükleme işlemi başlatılıyor...")
     raw_docs = load_pdfs(raw_data_path)
-    
+
     processed_chunks = process_and_chunk_documents(raw_docs)
-    
+
     # Doğrulama
     print("\n[DEBUG] Örnek Chunk'lar:")
     print("-" * 50)
