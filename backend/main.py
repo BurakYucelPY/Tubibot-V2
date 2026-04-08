@@ -15,14 +15,19 @@ from langchain_core.output_parsers import StrOutputParser
 # 3. Kaynaksız Saf Türkçe Çıktı
 # ====================================================================
 
-# 1. Sorgu İyileştirme Prompt'u
-QUERY_TRANSFORM_PROMPT = ChatPromptTemplate.from_messages([
-    ("system", "Sen kullanıcının girdiği soruyu vektör veritabanında arama yapmak için en uygun hale getiren bir asistansın. "
-               "KESİNLİKLE soruya cevap verme. Çıktın sadece TEK BİR SORU CÜMLESİ olmalı ve soru işaretiyle bitmelidir. "
-               "\n\nÇOK ÖNEMLİ KURALLAR:\n"
-               "1. Kullanıcının sorusundaki kavramları, kısaltmaları (TÜBİTAK, SKA, 2209-A vb.) ve hedefleri ASLA değiştirme, genel kavramlara dönüştürme.\n"
-               "2. Eğer kullanıcı 'SKA' (Sürdürülebilir Kalkınma Amaçları) diyorsa, bunu mutlaka 'Sürdürülebilir Kalkınma Amaçları (SKA)' şeklinde arama sorgusunda koru.\n"
-               "3. Sorunun ana niyetini (hangi kapsama girer, şartlar nelerdir vb.) birebir korumak zorundasın, kendi yorumunu katma."),
+# 1. Sorgu Genişletme (Query Expansion) Prompt'u
+# Orijinal sorguyu DEĞİŞTİRMEZ, kısaltmaları açarak ek arama termleri üretir.
+QUERY_EXPANSION_PROMPT = ChatPromptTemplate.from_messages([
+    ("system", "Kullanıcının sorusunu vektör veritabanında arama için HAFİFÇE genişlet. "
+               "KESİNLİKLE soruya cevap verme.\n\n"
+               "KURALLAR:\n"
+               "1. Orijinal soruyu neredeyse AYNEN koru.\n"
+               "2. SADECE kısaltmaların açılımını parantez içinde ekle:\n"
+               "   - SKA -> Sürdürülebilir Kalkınma Amaçları (SKA)\n"
+               "   - 2209-A -> TÜBİTAK 2209-A\n"
+               "3. Kendi bilginden ek anahtar kelime, konu veya alan EKLEME.\n"
+               "4. Çıktın en fazla 30 kelime olmalı ve soru işaretiyle bitmeli.\n"
+               "5. Sorunun niyetini DEĞİŞTİRME."),
     ("human", "{question}")
 ])
 
@@ -46,10 +51,17 @@ RAG_PROMPT = ChatPromptTemplate.from_messages([
 
 def format_docs_plain(docs):
     """
-    Belgeleri aralarına ayraç koyarak salt metin olarak birleştirir.
-    Kaynak (Citation) gösterimleri plan dahilinde kaldırılmıştır.
+    Belgeleri kaynak bilgisiyle birlikte formatlar.
+    LLM'nin bilgiyi doğru kaynaklara atfedebilmesi için her chunk'un önüne
+    kaynak ve bölüm bilgisi eklenir.
     """
-    return "\n\n---\n\n".join([doc.page_content for doc in docs])
+    formatted_parts = []
+    for doc in docs:
+        source = doc.metadata.get("source_document", "Bilinmeyen Belge")
+        section = doc.metadata.get("section_heading", "Genel")
+        header = f"[Kaynak: {source} | Bölüm: {section}]"
+        formatted_parts.append(f"{header}\n{doc.page_content}")
+    return "\n\n---\n\n".join(formatted_parts)
 
 def get_rag_chain():
     """Gelişmiş RAG zinciri (Query Transformation + Arama + Saf Üretim) oluştur."""
@@ -57,18 +69,20 @@ def get_rag_chain():
     llm = get_llm()
     parser = StrOutputParser()
 
-    # Query Transformation Zinciri
-    query_transform_chain = QUERY_TRANSFORM_PROMPT | llm | parser
+    # Query Expansion Zinciri
+    query_expansion_chain = QUERY_EXPANSION_PROMPT | llm | parser
 
     def rag_invoke(raw_question):
-        # Aşama 1: Sorgu İyileştirme (GEÇİCİ OLARAK DEVRE DIŞI BIRAKILDI)
-        print("\n[INFO] Sorgu:", raw_question)
-        # improved_question = query_transform_chain.invoke({"question": raw_question}).strip()
-        # print(f"[INFO] İyileştirilmiş Sorgu: {improved_question}")
-        improved_question = raw_question  # İyileştirme yapmadan direkt orijinal soruyu kullan
-        
-        # Aşama 2: Arama (Retrieval)
-        docs = retriever.invoke(improved_question)
+        # Aşama 1: Sorgu Genişletme (Query Expansion)
+        print("\n[INFO] Orijinal Sorgu:", raw_question)
+        try:
+            expanded_question = query_expansion_chain.invoke({"question": raw_question}).strip()
+            print(f"[INFO] Genişletilmiş Sorgu: {expanded_question}")
+        except Exception:
+            expanded_question = raw_question
+
+        # Aşama 2: Arama — genişletilmiş sorguyla retrieval
+        docs = retriever.invoke(expanded_question)
         
         if not docs:
             return "Bu konuyla ilgili mevcut belgelerde herhangi bir bilgi bulunamadı. Lütfen TÜBİTAK'ın güncel kaynaklarını kontrol ediniz."
@@ -76,11 +90,11 @@ def get_rag_chain():
         # Aşama 3: Bağlam Formatlama
         context = format_docs_plain(docs)
         
-        # Aşama 4: LLM Üretimi (Ana CEVAP)
+        # Aşama 4: LLM Üretimi (orijinal soruyla — genişletilmiş değil)
         response_chain = RAG_PROMPT | llm | parser
         return response_chain.invoke({
             "context": context,
-            "question": improved_question
+            "question": raw_question
         })
     
     return rag_invoke
