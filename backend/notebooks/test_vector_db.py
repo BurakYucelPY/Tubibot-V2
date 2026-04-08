@@ -14,10 +14,10 @@ def test_vector_db_metadata():
     print("\n" + "="*60)
     print("TEST 3: Vektör DB Metadata Kontrolü")
     print("="*60)
-    from langchain_huggingface import HuggingFaceEmbeddings
     from langchain_chroma import Chroma
-    
-    embeddings = HuggingFaceEmbeddings(model_name="intfloat/multilingual-e5-large")
+    from src.database.vector_store import E5Embeddings
+
+    embeddings = E5Embeddings(model_name="intfloat/multilingual-e5-large")
     vector_db = Chroma(persist_directory="backend/data/vector_db", embedding_function=embeddings)
     
     sample = vector_db.get(limit=10, include=["metadatas"])
