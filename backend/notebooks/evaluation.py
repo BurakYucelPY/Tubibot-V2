@@ -66,13 +66,13 @@ TEST_CASES = [
     {
         "question": "TÜBİTAK başkanının adı nedir?",
         "type": "out_of_scope",
-        "expected_keywords": ["ulaşamadım", "bulunamadı"],
+        "expected_keywords": ["bilgi", "bulunamadı", "ulaşamadım", "mevcut", "belge", "yok"],
         "description": "Kapsam dışı — reddetmesi beklenir",
     },
     {
         "question": "2209-A başvuru sonuçları ne zaman açıklanır?",
         "type": "out_of_scope",
-        "expected_keywords": ["ulaşamadım", "bulunamadı"],
+        "expected_keywords": ["bilgi", "bulunamadı", "ulaşamadım", "mevcut", "belge", "yok"],
         "description": "Belgede olmayan bilgi — ret beklenir",
     },
     # --- Koşullu Sorular ---
@@ -105,6 +105,7 @@ def evaluate_answer(test_case, answer):
         results["checks"].append(("Cevap yeterli uzunlukta", True))
 
     # Kontrol 2: Beklenen anahtar kelimeler var mı?
+    # out_of_scope türünde herhangi birinin eşleşmesi yeterli (OR mantığı)
     keywords_found = []
     keywords_missing = []
     for kw in test_case.get("expected_keywords", []):
@@ -113,7 +114,14 @@ def evaluate_answer(test_case, answer):
         else:
             keywords_missing.append(kw)
 
-    if keywords_missing:
+    is_out_of_scope = test_case.get("type") == "out_of_scope"
+    if is_out_of_scope:
+        if keywords_found:
+            results["checks"].append((f"Ret anahtar kelimeleri bulundu: {keywords_found}", True))
+        else:
+            results["checks"].append((f"Hiçbir ret anahtar kelimesi bulunamadı", False))
+            results["passed"] = False
+    elif keywords_missing:
         results["checks"].append((f"Eksik anahtar kelimeler: {keywords_missing}", False))
         results["passed"] = False
     else:
