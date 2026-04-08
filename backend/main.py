@@ -33,15 +33,9 @@ QUERY_EXPANSION_PROMPT = ChatPromptTemplate.from_messages([
 ])
 
 # 2. Ana RAG Promptu (Llama 3 Uyumlu)
-RAG_SYSTEM_PROMPT = """Sen TÜBİTAK projeleri (özellikle 2209-A) ve Sürdürülebilir Kalkınma Amaçları (SKA) konusunda uzman asistan "Tubibot"sun.
-Aşağıda verilen "Bağlam" (Context) metinlerini kullanarak soruyu detaylıca cevapla.
-
-KURALLAR:
-1. SADECE ve SADECE bağlamda bulunan bilgileri kullan. Kendi dış bilginle (örneğin bağlamda geçmeyen 14.1.1, 6.1.1 gibi alt gösterge numaraları uydurarak) ASLA ekleme veya yorum yapma.
-2. Bağlamda cevap yoksa sadece: "Bu bilgiye mevcut TÜBİTAK belgelerinde ulaşamadım." de.
-3. SKA hedefleri (Örn: Hedef 14.1, Hedef 14.2 vb.) soruluyorsa, bu maddeleri bağlamda yazan orijinal haliyle EKSİKSİZ, KISALTMADAN ve ÖZETLEMEDEN listeleyeceksin. Yarım yamalak bilgi verme.
-4. Çıktında HİÇBİR ŞEKİLDE kaynak, belge numarası veya referans (Örn: [Kaynak 1]) belirtme.
-5. Hedef/madde metinlerini aktarırken, metin içinde geçen diğer belgelere yapılan dahili atıfları (örn: "'İstediğimiz Gelecek' belgesinin 158. paragrafında belirtildiği üzere", "BM Kararı No: ...") ÇIKAR ve sadece hedefin asıl içeriğini yaz.
+RAG_SYSTEM_PROMPT = """Sen "Tubibot"sun — TÜBİTAK 2209-A ve Sürdürülebilir Kalkınma Amaçları (SKA) konusunda yardımcı bir asistan.
+Aşağıdaki bağlamı kullanarak soruyu cevapla. Bilgiyi kullanıcının sorusuyla ilişkilendirerek açıkla.
+Bağlamda olmayan bilgiyi uydurma. Kaynak veya referans numarası belirtme. Metin içindeki dahili belge atıflarını (ör: "158. paragrafında belirtildiği üzere") çıkar.
 
 BAĞLAM:
 {context}"""
@@ -110,7 +104,7 @@ if __name__ == "__main__":
     
     # Test soruları
     test_questions = [
-        "Sulardaki yaşamı korumaya yönelik bir proje ypamayı düşünüyorum. Hangi SKA kapsamı ve hedeflerine girebilir bu proje. Ekstra olarak öncelikli alanlara girer mi?"]
+        "Sulardaki yaşamı korumaya yönelik bir proje yapmayı düşünüyorum. Hangi  SKA kapsamına girebilir?"]
     
     for soru in test_questions:
         print(f"\n[KULLANICI]: {soru}\n")
