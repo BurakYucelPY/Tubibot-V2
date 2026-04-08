@@ -46,7 +46,7 @@ def test_prompt_and_sources():
     print(f"  {PASS if has_cot else FAIL} Chain-of-Thought talimatı var")
     print(f"  {PASS if has_format else FAIL} Yapılandırılmış cevap formatı talimatı var")
     
-    result = has_source_ref and has_separator and has_content and has_hallucination_guard
+    result = has_separator and has_content and has_hallucination_guard and has_cot and has_format
     print(f"\n  {'🎉 TEST BAŞARILI!' if result else '⚠️ TEST BAŞARISIZ!'}")
     return result
 
