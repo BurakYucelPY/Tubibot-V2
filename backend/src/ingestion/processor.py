@@ -12,7 +12,7 @@ CHUNK_CONFIG = {
     "cagri_duyurusu": {"chunk_size": 800, "chunk_overlap": 200},    # Kısa maddeler
     "basvuru_formu": {"chunk_size": 800, "chunk_overlap": 200},     # Form maddeleri
     "basvuru_kosullari": {"chunk_size": 800, "chunk_overlap": 200}, # Koşul maddeleri
-    "oncelikli_alanlar": {"chunk_size": 1000, "chunk_overlap": 200},# Orta uzunluk
+    "oncelikli_alanlar": {"chunk_size": 5000, "chunk_overlap": 200},# Kısa liste — tek chunk
     "default": {"chunk_size": 1000, "chunk_overlap": 200},          # Fallback
 }
 
