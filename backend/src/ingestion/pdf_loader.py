@@ -6,30 +6,20 @@ from langchain_community.document_loaders import UnstructuredPDFLoader, PyPDFLoa
 # Bu sayede chunk'lar hangi belgeden/türden geldiğini bilecek.
 # ====================================================================
 PDF_METADATA_MAP = {
-    "2209-A_2025_Yili_Cagri_Duyurusu_09102025.pdf": {
+    "2209-A_2025_Cagri_Duyurusu.pdf": {
         "source_document": "2209-A 2025 Yılı Çağrı Duyurusu",
         "document_type": "cagri_duyurusu",
         "year": "2025",
     },
-    "2209-A_arastirma_onerisi_formu_09102025.pdf": {
+    "tubitak_2209a_form.pdf": {
         "source_document": "2209-A Araştırma Önerisi Formu",
         "document_type": "basvuru_formu",
-        "year": "2025",
-    },
-    "Oncelikli_Alanlar_2025-2.pdf": {
-        "source_document": "2025 Öncelikli Alanlar Listesi",
-        "document_type": "oncelikli_alanlar",
         "year": "2025",
     },
     "Öncelikli Alanlar.pdf": {
         "source_document": "2025 Öncelikli Alanlar Listesi",
         "document_type": "oncelikli_alanlar",
         "year": "2025",
-    },
-    "SKA Kapsamı ve Göstergeleri.pdf": {
-        "source_document": "Sürdürülebilir Kalkınma Amaçları Kapsamı ve Göstergeleri",
-        "document_type": "ska_rehberi",
-        "year": "",
     },
     "SKA_Surdurulebilir_Kalkinma.pdf": {
         "source_document": "Sürdürülebilir Kalkınma Amaçları Kapsamı ve Göstergeleri",
