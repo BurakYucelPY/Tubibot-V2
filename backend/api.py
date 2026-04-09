@@ -1,3 +1,4 @@
+import asyncio
 import os
 import sys
 
@@ -118,8 +119,12 @@ async def chat(request: ChatRequest):
         }):
             if hasattr(chunk, "content") and chunk.content:
                 yield chunk.content
+                await asyncio.sleep(0)
 
-    return StreamingResponse(generate(), media_type="text/plain")
+    return StreamingResponse(generate(), media_type="text/plain", headers={
+        "Cache-Control": "no-cache",
+        "X-Content-Type-Options": "nosniff",
+    })
 
 
 @app.get("/api/health")
