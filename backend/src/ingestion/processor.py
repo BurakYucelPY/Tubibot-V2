@@ -63,7 +63,7 @@ def process_and_chunk_documents(raw_documents):
     print("\n[INFO] Aşama 1: Veri Filtreleme (Noise Reduction) Başlatıldı.")
     for doc in raw_documents:
         category = doc.metadata.get("category", "")
-        if category in ["Header", "Footer", "PageBreak", "UncategorizedText"]:
+        if category in ["Header", "Footer", "PageBreak"]:
             continue
         cleaned_documents.append(doc)
 
@@ -192,7 +192,9 @@ def process_and_chunk_documents(raw_documents):
 
 
 if __name__ == "__main__":
-    raw_data_path = "backend/data/2209A_pdf"
+    import sys
+    sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", ".."))
+    raw_data_path = os.path.join(os.path.dirname(__file__), "..", "..", "data", "2209A_pdf")
     print("[INFO] PDF yükleme işlemi başlatılıyor...")
     raw_docs = load_pdfs(raw_data_path)
 
