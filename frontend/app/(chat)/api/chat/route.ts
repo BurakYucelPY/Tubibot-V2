@@ -56,7 +56,7 @@ export async function POST(request: Request) {
           delta:
             "Backend ile bağlantı kurulamadı. Lütfen Python backend'in çalıştığından emin olun.",
         });
-        writer.write({ type: "text-finish", id: errorId });
+        writer.write({ type: "text-end", id: errorId });
         return;
       }
 
@@ -77,7 +77,7 @@ export async function POST(request: Request) {
       }
 
       // Finish text part
-      writer.write({ type: "text-finish", id: partId });
+      writer.write({ type: "text-end", id: partId });
     },
     generateId: generateUUID,
   });
