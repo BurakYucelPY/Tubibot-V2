@@ -163,7 +163,7 @@ function PureMultimodalInput({
         setMessages(() => []);
         break;
       case "rename":
-        toast("Rename is available from the sidebar chat menu.");
+        toast("Yeniden adlandırma kenar çubuğundaki sohbet menüsünden yapılabilir.");
         break;
       case "model": {
         const modelBtn = document.querySelector<HTMLButtonElement>(
@@ -176,30 +176,30 @@ function PureMultimodalInput({
         setTheme(resolvedTheme === "dark" ? "light" : "dark");
         break;
       case "delete":
-        toast("Delete this chat?", {
+        toast("Bu sohbeti sil?", {
           action: {
-            label: "Delete",
+            label: "Sil",
             onClick: () => {
               fetch(
                 `${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}/api/chat?id=${chatId}`,
                 { method: "DELETE" }
               );
               router.push("/");
-              toast.success("Chat deleted");
+              toast.success("Sohbet silindi");
             },
           },
         });
         break;
       case "purge":
-        toast("Delete all chats?", {
+        toast("Tüm sohbetleri sil?", {
           action: {
-            label: "Delete all",
+            label: "Tümünü sil",
             onClick: () => {
               fetch(`${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}/api/history`, {
                 method: "DELETE",
               });
               router.push("/");
-              toast.success("All chats deleted");
+              toast.success("Tüm sohbetler silindi");
             },
           },
         });
@@ -282,7 +282,7 @@ function PureMultimodalInput({
       const { error } = await response.json();
       toast.error(error);
     } catch (_error) {
-      toast.error("Failed to upload file, please try again!");
+      toast.error("Dosya yüklenemedi, lütfen tekrar deneyin!");
     }
   }, []);
 
@@ -304,7 +304,7 @@ function PureMultimodalInput({
           ...successfullyUploadedAttachments,
         ]);
       } catch (_error) {
-        toast.error("Failed to upload files");
+        toast.error("Dosyalar yüklenemedi");
       } finally {
         setUploadQueue([]);
       }
@@ -329,7 +329,7 @@ function PureMultimodalInput({
 
       event.preventDefault();
 
-      setUploadQueue((prev) => [...prev, "Pasted image"]);
+      setUploadQueue((prev) => [...prev, "Yapıştırılan görsel"]);
 
       try {
         const uploadPromises = imageItems
@@ -350,7 +350,7 @@ function PureMultimodalInput({
           ...(successfullyUploadedAttachments as Attachment[]),
         ]);
       } catch (_error) {
-        toast.error("Failed to upload pasted image(s)");
+        toast.error("Yapıştırılan görsel(ler) yüklenemedi");
       } finally {
         setUploadQueue([]);
       }
@@ -372,7 +372,7 @@ function PureMultimodalInput({
     <div className={cn("relative flex w-full flex-col gap-4", className)}>
       {editingMessage && onCancelEdit && (
         <div className="flex items-center gap-2 text-[12px] text-muted-foreground">
-          <span>Editing message</span>
+          <span>Mesaj düzenleniyor</span>
           <button
             className="rounded px-1.5 py-0.5 text-muted-foreground/50 transition-colors hover:bg-muted hover:text-foreground"
             onMouseDown={(e) => {
@@ -435,7 +435,7 @@ function PureMultimodalInput({
           if (status === "ready" || status === "error") {
             submitForm();
           } else {
-            toast.error("Please wait for the model to finish its response!");
+            toast.error("Lütfen modelin yanıtını bitirmesini bekleyin!");
           }
         }}
       >
@@ -510,7 +510,7 @@ function PureMultimodalInput({
             }
           }}
           placeholder={
-            editingMessage ? "Edit your message..." : "Ask anything..."
+            editingMessage ? "Mesajınızı düzenleyin..." : "Bir şey sorun..."
           }
           ref={textareaRef}
           value={input}
@@ -664,7 +664,7 @@ function PureModelSelectorCompact({
         </Button>
       </ModelSelectorTrigger>
       <ModelSelectorContent>
-        <ModelSelectorInput placeholder="Search models..." />
+        <ModelSelectorInput placeholder="Model ara..." />
         <ModelSelectorList>
           {(() => {
             const curatedIds = new Set(chatModels.map((m) => m.id));
