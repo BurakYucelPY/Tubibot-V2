@@ -39,12 +39,12 @@ export function PureMessageActions({
 
   const handleCopy = async () => {
     if (!textFromParts) {
-      toast.error("There's no text to copy!");
+      toast.error("Kopyalanacak metin yok!");
       return;
     }
 
     await copyToClipboard(textFromParts);
-    toast.success("Copied to clipboard!");
+    toast.success("Panoya kopyalandı!");
   };
 
   if (message.role === "user") {
@@ -56,7 +56,7 @@ export function PureMessageActions({
               className="size-7 text-muted-foreground/50 hover:text-foreground"
               data-testid="message-edit-button"
               onClick={onEdit}
-              tooltip="Edit"
+              tooltip="Düzenle"
             >
               <PencilEditIcon />
             </Action>
@@ -64,7 +64,7 @@ export function PureMessageActions({
           <Action
             className="size-7 text-muted-foreground/50 hover:text-foreground"
             onClick={handleCopy}
-            tooltip="Copy"
+            tooltip="Kopyala"
           >
             <CopyIcon />
           </Action>
@@ -78,7 +78,7 @@ export function PureMessageActions({
       <Action
         className="text-muted-foreground/50 hover:text-foreground"
         onClick={handleCopy}
-        tooltip="Copy"
+        tooltip="Kopyala"
       >
         <CopyIcon />
       </Action>
@@ -101,7 +101,7 @@ export function PureMessageActions({
           );
 
           toast.promise(upvote, {
-            loading: "Upvoting Response...",
+            loading: "Yanıt beğeniliyor...",
             success: () => {
               mutate<Vote[]>(
                 `${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}/api/vote?chatId=${chatId}`,
@@ -126,12 +126,12 @@ export function PureMessageActions({
                 { revalidate: false }
               );
 
-              return "Upvoted Response!";
+              return "Yanıt beğenildi!";
             },
-            error: "Failed to upvote response.",
+            error: "Yanıt beğenilemedi.",
           });
         }}
-        tooltip="Upvote Response"
+        tooltip="Yanıtı beğen"
       >
         <ThumbUpIcon />
       </Action>
@@ -154,7 +154,7 @@ export function PureMessageActions({
           );
 
           toast.promise(downvote, {
-            loading: "Downvoting Response...",
+            loading: "Yanıt beğenilmiyor...",
             success: () => {
               mutate<Vote[]>(
                 `${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}/api/vote?chatId=${chatId}`,
@@ -179,12 +179,12 @@ export function PureMessageActions({
                 { revalidate: false }
               );
 
-              return "Downvoted Response!";
+              return "Yanıt beğenilmedi olarak işaretlendi!";
             },
-            error: "Failed to downvote response.",
+            error: "Yanıt beğenilmedi olarak işaretlenemedi.",
           });
         }}
-        tooltip="Downvote Response"
+        tooltip="Yanıtı beğenme"
       >
         <ThumbDownIcon />
       </Action>
