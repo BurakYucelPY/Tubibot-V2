@@ -18,7 +18,8 @@ def test_vector_db_metadata():
     from src.database.vector_store import E5Embeddings
 
     embeddings = E5Embeddings(model_name="intfloat/multilingual-e5-large")
-    vector_db = Chroma(persist_directory="backend/data/vector_db", embedding_function=embeddings)
+    _backend_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+    vector_db = Chroma(persist_directory=os.path.join(_backend_root, "data", "vector_db"), embedding_function=embeddings)
     
     sample = vector_db.get(limit=10, include=["metadatas"])
     
