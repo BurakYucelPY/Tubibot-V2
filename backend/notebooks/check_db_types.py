@@ -6,7 +6,8 @@ from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_chroma import Chroma
 
 embeddings = HuggingFaceEmbeddings(model_name="intfloat/multilingual-e5-large")
-db = Chroma(persist_directory="backend/data/vector_db", embedding_function=embeddings)
+_backend_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+db = Chroma(persist_directory=os.path.join(_backend_root, "data", "vector_db"), embedding_function=embeddings)
 
 all_data = db.get(include=["metadatas"])
 
