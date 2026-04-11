@@ -36,6 +36,11 @@ export async function POST(request: Request) {
     return new Response("Empty message", { status: 400 });
   }
 
+  const selectedChatModel =
+    typeof body.selectedChatModel === "string"
+      ? body.selectedChatModel
+      : "groq/llama-3.3-70b";
+
   const stream = createUIMessageStream({
     execute: async ({ writer }) => {
       const partId = generateId();
@@ -44,7 +49,7 @@ export async function POST(request: Request) {
       const response = await fetch(`${PYTHON_BACKEND_URL}/api/chat`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: userText }),
+        body: JSON.stringify({ message: userText, model: selectedChatModel }),
       });
 
       if (!response.ok || !response.body) {
