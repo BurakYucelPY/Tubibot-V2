@@ -30,6 +30,12 @@ export const chatModels: ChatModel[] = [
     provider: "groq",
     description: "Groq üzerinde çalışan hızlı ve güçlü açık kaynak model",
   },
+  {
+    id: "groq/openai/gpt-oss-120b",
+    name: "GPT-OSS 120B",
+    provider: "groq",
+    description: "Groq üzerinde çalışan OpenAI açık kaynak 120B modeli",
+  },
 ];
 
 export async function getCapabilities(): Promise<
