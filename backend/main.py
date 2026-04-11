@@ -104,7 +104,7 @@ if __name__ == "__main__":
     
     # Test soruları
     test_questions = [
-        "Sulardaki yaşamı korumaya yönelik bir proje yapmayı düşünüyorum. Hangi  SKA kapsamına girebilir?"]
+        "Tübitak 2209-A raporun yöntem kısmı nasıl yazılır?"]
     
     for soru in test_questions:
         print(f"\n[KULLANICI]: {soru}\n")

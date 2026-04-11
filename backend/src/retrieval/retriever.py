@@ -40,7 +40,9 @@ def _load_vector_db_and_docs():
     """ChromaDB'den vektör DB ve tüm dokümanları yükle."""
     model_name = "intfloat/multilingual-e5-large"
     embeddings = E5Embeddings(model_name=model_name)
-    persist_directory = "backend/data/vector_db"
+    # __file__ → backend/src/retrieval/retriever.py → 2 üst = backend/
+    _backend_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
+    persist_directory = os.path.join(_backend_root, "data", "vector_db")
 
     vector_db = Chroma(
         persist_directory=persist_directory,

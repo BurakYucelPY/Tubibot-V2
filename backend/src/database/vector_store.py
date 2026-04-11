@@ -30,7 +30,8 @@ class E5Embeddings(HuggingFaceEmbeddings):
 def build_vector_database():
     print("\n[INFO] Vektör Veritabanı (Vector DB) inşa süreci başlatılıyor...")
 
-    raw_data_path = "backend/data/2209A_pdf"
+    _backend_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
+    raw_data_path = os.path.join(_backend_root, "data", "2209A_pdf")
     raw_docs = load_pdfs(raw_data_path)
     chunks = process_and_chunk_documents(raw_docs)
 
@@ -42,7 +43,7 @@ def build_vector_database():
     print(f"\n[INFO] (TÜRKÇE ODAKLI) Embedding modeli yükleniyor: {model_name}")
     embeddings = E5Embeddings(model_name=model_name)
 
-    persist_directory = "backend/data/vector_db"
+    persist_directory = os.path.join(_backend_root, "data", "vector_db")
 
     # Eski veritabanını temizle (varsa)
     if os.path.exists(persist_directory):
@@ -67,5 +68,6 @@ def build_vector_database():
     return vector_db
 
 if __name__ == "__main__":
-    os.makedirs("backend/data/vector_db", exist_ok=True)
+    _root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
+    os.makedirs(os.path.join(_root, "data", "vector_db"), exist_ok=True)
     build_vector_database()
