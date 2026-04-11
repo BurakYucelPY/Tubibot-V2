@@ -17,11 +17,9 @@ import {
 } from "react";
 import useSWR, { useSWRConfig } from "swr";
 import { unstable_serialize } from "swr/infinite";
-import { useDataStream } from "@/components/chat/data-stream-provider";
 import { getChatHistoryPaginationKey } from "@/components/chat/sidebar-history";
 import { toast } from "@/components/chat/toast";
 import type { VisibilityType } from "@/components/chat/visibility-selector";
-import { useAutoResume } from "@/hooks/use-auto-resume";
 import { DEFAULT_CHAT_MODEL } from "@/lib/ai/models";
 import type { Vote } from "@/lib/db/schema";
 import { ChatbotError } from "@/lib/errors";
@@ -58,7 +56,6 @@ function extractChatId(pathname: string): string | null {
 
 export function ActiveChatProvider({ children }: { children: ReactNode }) {
   const pathname = usePathname();
-  const { setDataStream } = useDataStream();
   const { mutate } = useSWRConfig();
 
   const chatIdFromUrl = extractChatId(pathname);
@@ -104,7 +101,6 @@ export function ActiveChatProvider({ children }: { children: ReactNode }) {
     status,
     stop,
     regenerate,
-    resumeStream,
     addToolApprovalResponse,
   } = useChat<ChatMessage>({
     id: chatId,
@@ -151,9 +147,6 @@ export function ActiveChatProvider({ children }: { children: ReactNode }) {
         };
       },
     }),
-    onData: (dataPart) => {
-      setDataStream((ds) => (ds ? [...ds, dataPart] : []));
-    },
     onFinish: () => {
       mutate(unstable_serialize(getChatHistoryPaginationKey));
     },
@@ -226,13 +219,6 @@ export function ActiveChatProvider({ children }: { children: ReactNode }) {
       });
     }
   }, [sendMessage, chatId]);
-
-  useAutoResume({
-    autoResume: !isNewChat && !!chatData,
-    initialMessages,
-    resumeStream,
-    setMessages,
-  });
 
   const isReadonly = isNewChat ? false : (chatData?.isReadonly ?? false);
 
