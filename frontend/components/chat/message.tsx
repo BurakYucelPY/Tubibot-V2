@@ -5,23 +5,13 @@ import type { ChatMessage } from "@/lib/types";
 import { cn, sanitizeText } from "@/lib/utils";
 import { MessageContent, MessageResponse } from "../ai-elements/message";
 import { Shimmer } from "../ai-elements/shimmer";
-import {
-  Tool,
-  ToolContent,
-  ToolHeader,
-  ToolInput,
-  ToolOutput,
-} from "../ai-elements/tool";
-import { useDataStream } from "./data-stream-provider";
-import { DocumentToolResult } from "./document";
-import { DocumentPreview } from "./document-preview";
 import { SparklesIcon } from "./icons";
 import { MessageActions } from "./message-actions";
 import { MessageReasoning } from "./message-reasoning";
 import { PreviewAttachment } from "./preview-attachment";
 
 const PurePreviewMessage = ({
-  addToolApprovalResponse,
+  addToolApprovalResponse: _addToolApprovalResponse,
   chatId,
   message,
   vote,
@@ -47,8 +37,6 @@ const PurePreviewMessage = ({
     (part) => part.type === "file"
   );
 
-  useDataStream();
-
   const isUser = message.role === "user";
   const isAssistant = message.role === "assistant";
 
@@ -57,8 +45,7 @@ const PurePreviewMessage = ({
       (part.type === "text" && part.text?.trim().length > 0) ||
       (part.type === "reasoning" &&
         "text" in part &&
-        part.text?.trim().length > 0) ||
-      part.type.startsWith("tool-")
+        part.text?.trim().length > 0)
   );
   const isThinking = isAssistant && isLoading && !hasAnyContent;
 
@@ -124,89 +111,6 @@ const PurePreviewMessage = ({
         >
           <MessageResponse>{sanitizeText(part.text)}</MessageResponse>
         </MessageContent>
-      );
-    }
-
-    if (type === "tool-createDocument") {
-      const { toolCallId } = part;
-
-      if (part.output && "error" in part.output) {
-        return (
-          <div
-            className="rounded-lg border border-red-200 bg-red-50 p-4 text-red-500 dark:bg-red-950/50"
-            key={toolCallId}
-          >
-            Error creating document: {String(part.output.error)}
-          </div>
-        );
-      }
-
-      return (
-        <DocumentPreview
-          isReadonly={isReadonly}
-          key={toolCallId}
-          result={part.output}
-        />
-      );
-    }
-
-    if (type === "tool-updateDocument") {
-      const { toolCallId } = part;
-
-      if (part.output && "error" in part.output) {
-        return (
-          <div
-            className="rounded-lg border border-red-200 bg-red-50 p-4 text-red-500 dark:bg-red-950/50"
-            key={toolCallId}
-          >
-            Error updating document: {String(part.output.error)}
-          </div>
-        );
-      }
-
-      return (
-        <div className="relative" key={toolCallId}>
-          <DocumentPreview
-            args={{ ...part.output, isUpdate: true }}
-            isReadonly={isReadonly}
-            result={part.output}
-          />
-        </div>
-      );
-    }
-
-    if (type === "tool-requestSuggestions") {
-      const { toolCallId, state } = part;
-
-      return (
-        <Tool
-          className="w-[min(100%,450px)]"
-          defaultOpen={true}
-          key={toolCallId}
-        >
-          <ToolHeader state={state} type="tool-requestSuggestions" />
-          <ToolContent>
-            {state === "input-available" && <ToolInput input={part.input} />}
-            {state === "output-available" && (
-              <ToolOutput
-                errorText={undefined}
-                output={
-                  "error" in part.output ? (
-                    <div className="rounded border p-2 text-red-500">
-                      Error: {String(part.output.error)}
-                    </div>
-                  ) : (
-                    <DocumentToolResult
-                      isReadonly={isReadonly}
-                      result={part.output}
-                      type="request-suggestions"
-                    />
-                  )
-                }
-              />
-            )}
-          </ToolContent>
-        </Tool>
       );
     }
 
