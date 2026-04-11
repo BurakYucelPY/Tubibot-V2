@@ -1,6 +1,5 @@
 import "server-only";
 
-import type { ArtifactKind } from "@/components/chat/artifact";
 import type { VisibilityType } from "@/components/chat/visibility-selector";
 import type {
   Chat,
@@ -10,6 +9,8 @@ import type {
   User,
   Vote,
 } from "./schema";
+
+type ArtifactKind = "text" | "code" | "image" | "sheet";
 
 // Mock DB — no PostgreSQL needed. All functions return empty/mock data.
 
