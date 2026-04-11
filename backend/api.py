@@ -69,28 +69,39 @@ def format_docs_plain(docs):
 
 # Uygulama baslarken RAG bilesenlerini yukle
 retriever = None
-llm = None
+default_llm = None
 parser = StrOutputParser()
 query_expansion_chain = None
+llm_cache: dict[str, object] = {}
+
+
+def _get_or_create_llm(model_id: str | None):
+    key = model_id or "__default__"
+    if key not in llm_cache:
+        llm_cache[key] = get_llm(model_id)
+    return llm_cache[key]
 
 
 @app.on_event("startup")
 def startup():
-    global retriever, llm, query_expansion_chain
+    global retriever, default_llm, query_expansion_chain
     print("[INFO] Tubibot V2 API baslatiliyor...")
     retriever = get_retriever()
-    llm = get_llm()
-    query_expansion_chain = QUERY_EXPANSION_PROMPT | llm | parser
+    default_llm = get_llm()
+    llm_cache["__default__"] = default_llm
+    query_expansion_chain = QUERY_EXPANSION_PROMPT | default_llm | parser
     print("[INFO] RAG pipeline hazir.")
 
 
 class ChatRequest(BaseModel):
     message: str
+    model: str | None = None
 
 
 @app.post("/api/chat")
 async def chat(request: ChatRequest):
     raw_question = request.message
+    selected_llm = _get_or_create_llm(request.model)
 
     # 1. Query Expansion
     try:
@@ -110,7 +121,7 @@ async def chat(request: ChatRequest):
     context = format_docs_plain(docs)
 
     # 4. Streaming LLM response
-    response_chain = RAG_PROMPT | llm
+    response_chain = RAG_PROMPT | selected_llm
 
     async def generate():
         for chunk in response_chain.stream({
