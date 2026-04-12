@@ -2,7 +2,7 @@
 
 import { useEffect, useId, useRef } from "react";
 import clsx from "clsx";
-import { animate } from "motion";
+import { animate } from "motion/mini";
 
 type StarPoint = [x: number, y: number, dim?: boolean, blur?: boolean];
 
@@ -95,8 +95,8 @@ function Star({
         {
           delay,
           duration: Math.random() * 2 + 2,
+          direction: "alternate",
           repeat: Number.POSITIVE_INFINITY,
-          repeatType: "reverse",
         },
       ),
     ];

@@ -31,7 +31,7 @@ export function Intro() {
       </div>
       <h1 className="mt-14 font-display text-4xl/tight font-light text-white">
         Yapay zeka destekli{" "}
-        <span className="text-sky-300">TÜBİTAK araştırma asistanı</span>
+        <span className="text-red-400">TÜBİTAK araştırma asistanı</span>
       </h1>
       <p className="mt-4 text-sm/6 text-gray-300">
         Tübibot, TÜBİTAK proje başvuru süreçlerinizde size yardımcı olan yapay
@@ -74,10 +74,10 @@ export function IntroFooter() {
         href="https://www.tubitak.gov.tr"
         target="_blank"
         rel="noopener noreferrer"
-        className="group flex items-center gap-x-1.5 transition-colors hover:text-sky-300"
+        className="group flex items-center gap-x-1.5 transition-colors hover:text-red-400"
       >
         <TubitakIcon className="h-6 w-6 flex-none" />
-        <span className="font-medium text-white group-hover:text-sky-300">
+        <span className="font-medium text-white group-hover:text-red-400">
           TÜBİTAK
         </span>
       </Link>
