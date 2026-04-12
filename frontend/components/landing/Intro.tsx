@@ -40,25 +40,25 @@ export function Intro() {
       </p>
       <SignUpForm />
       <div className="mt-8 flex flex-wrap justify-center gap-x-1 gap-y-3 sm:gap-x-2 lg:justify-start">
-        <IconLink href="#" icon={TubitakIcon} className="flex-none">
+        <IconLink href="https://arbis.tubitak.gov.tr/" target="_blank" rel="noopener noreferrer" icon={TubitakIcon} className="flex-none">
           ARBİS
         </IconLink>
-        <IconLink href="#" icon={TubitakIcon} className="flex-none">
+        <IconLink href="https://ardeb-pbs.tubitak.gov.tr/" target="_blank" rel="noopener noreferrer" icon={TubitakIcon} className="flex-none">
           ARDEB PBS
         </IconLink>
-        <IconLink href="#" icon={TubitakIcon} className="flex-none">
+        <IconLink href="https://eteydeb.tubitak.gov.tr/teydebanasayfa.htm" target="_blank" rel="noopener noreferrer" icon={TubitakIcon} className="flex-none">
           TEYDEB
         </IconLink>
-        <IconLink href="#" icon={TubitakIcon} className="flex-none">
+        <IconLink href="https://ebideb.tubitak.gov.tr/giris.htm" target="_blank" rel="noopener noreferrer" icon={TubitakIcon} className="flex-none">
           E-BİDEB
         </IconLink>
-        <IconLink href="#" icon={TubitakIcon} className="flex-none">
+        <IconLink href="https://bilimtoplum-pbs.tubitak.gov.tr/" target="_blank" rel="noopener noreferrer" icon={TubitakIcon} className="flex-none">
           BİTO
         </IconLink>
-        <IconLink href="#" icon={TubitakIcon} className="flex-none">
+        <IconLink href="https://uidb-pbs.tubitak.gov.tr/" target="_blank" rel="noopener noreferrer" icon={TubitakIcon} className="flex-none">
           UİDB
         </IconLink>
-        <IconLink href="#" icon={TubitakIcon} className="flex-none">
+        <IconLink href="https://tybsng.tubitak.gov.tr" target="_blank" rel="noopener noreferrer" icon={TubitakIcon} className="flex-none">
           TYBS
         </IconLink>
       </div>
