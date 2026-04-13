@@ -7,7 +7,7 @@ export const authConfig = {
   trustHost: true,
   pages: {
     signIn: `${base}/login`,
-    newUser: `${base}/`,
+    newUser: `${base}/chat`,
   },
   providers: [],
   callbacks: {},

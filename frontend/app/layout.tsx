@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import localFont from "next/font/local";
 import { ThemeProvider } from "@/components/theme-provider";
 import { TooltipProvider } from "@/components/ui/tooltip";
 
@@ -26,6 +27,13 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
   display: "swap",
   variable: "--font-geist-mono",
+});
+
+const monaSans = localFont({
+  src: "../public/fonts/Mona-Sans.var.woff2",
+  display: "swap",
+  variable: "--font-mona-sans",
+  weight: "200 900",
 });
 
 const LIGHT_THEME_COLOR = "hsl(0 0% 100%)";
@@ -55,8 +63,8 @@ export default function RootLayout({
 }>) {
   return (
     <html
-      className={`${geist.variable} ${geistMono.variable}`}
-      lang="en"
+      className={`${geist.variable} ${geistMono.variable} ${monaSans.variable}`}
+      lang="tr"
       suppressHydrationWarning
     >
       <head>
