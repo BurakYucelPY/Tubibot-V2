@@ -5,6 +5,8 @@ import {
   MessageSquareIcon,
   PanelLeftIcon,
   PenSquareIcon,
+  GlobeIcon,
+  FileTextIcon,
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -70,7 +72,10 @@ export function AppSidebar({ user }: { user: User | undefined }) {
           </SidebarMenu>
         </SidebarHeader>
         <SidebarContent>
-          <SidebarGroup className="pt-1">
+          <SidebarGroup className="pt-2">
+            <div className="px-2 pb-2 text-xs font-semibold text-sidebar-foreground/50">
+              SOHBET
+            </div>
             <SidebarGroupContent>
               <SidebarMenu>
                 <SidebarMenuItem>
@@ -89,16 +94,45 @@ export function AppSidebar({ user }: { user: User | undefined }) {
                 <SidebarMenuItem>
                   <SidebarMenuButton
                     className="h-8 rounded-lg border border-sidebar-border text-[13px] text-sidebar-foreground/70 transition-colors duration-150 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground"
-                    tooltip="Haberler ve Duyurular"
+                    tooltip="Gündem Hakkında Sor"
                   >
-                    <NewspaperIcon className="size-4" />
-                    <span className="font-medium">Haberler ve Duyurular</span>
+                    <GlobeIcon className="size-4" />
+                    <span className="font-medium">Gündem Hakkında Sor</span>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
 
               </SidebarMenu>
             </SidebarGroupContent>
           </SidebarGroup>
+
+          <SidebarGroup className="pt-2">
+            <div className="px-2 pb-2 text-xs font-semibold text-sidebar-foreground/50">
+              GÜNCELLEMELER
+            </div>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                <SidebarMenuItem>
+                  <SidebarMenuButton
+                    className="h-8 rounded-lg border border-sidebar-border text-[13px] text-sidebar-foreground/70 transition-colors duration-150 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground"
+                    tooltip="Haberler ve Duyurular"
+                  >
+                    <NewspaperIcon className="size-4" />
+                    <span className="font-medium">Haberler ve Duyurular</span>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+                <SidebarMenuItem>
+                  <SidebarMenuButton
+                    className="h-8 rounded-lg border border-sidebar-border text-[13px] text-sidebar-foreground/70 transition-colors duration-150 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground"
+                    tooltip="Dokümanlar"
+                  >
+                    <FileTextIcon className="size-4" />
+                    <span className="font-medium">Dokümanlar</span>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+
           <SidebarHistory user={user} />
         </SidebarContent>
         <SidebarFooter className="border-t border-sidebar-border pt-2 pb-3">
