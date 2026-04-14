@@ -1,9 +1,12 @@
 "use client";
 
-import { ChevronUp } from "lucide-react";
+import { ChevronUp, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import type { User } from "next-auth";
 import { signOut, useSession } from "next-auth/react";
+import { useState } from "react";
+import { useSWRConfig } from "swr";
+import { unstable_serialize } from "swr/infinite";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -17,6 +20,17 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
 import { guestRegex } from "@/lib/constants";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { getChatHistoryPaginationKey } from "./sidebar-history";
 import { LoaderIcon } from "./icons";
 import { toast } from "./toast";
 
@@ -31,12 +45,27 @@ function emailToHue(email: string): number {
 export function SidebarUserNav({ user }: { user: User }) {
   const router = useRouter();
   const { data, status } = useSession();
+  const { mutate } = useSWRConfig();
+  const [showDeleteAllDialog, setShowDeleteAllDialog] = useState(false);
 
   const isGuest = guestRegex.test(data?.user?.email ?? "");
 
+  const handleDeleteAll = () => {
+    setShowDeleteAllDialog(false);
+    router.replace("/");
+    mutate(unstable_serialize(getChatHistoryPaginationKey), [], {
+      revalidate: false,
+    });
+    fetch(`${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}/api/history`, {
+      method: "DELETE",
+    });
+    toast({ type: "success", description: "Tüm sohbetler silindi" });
+  };
+
   return (
-    <SidebarMenu>
-      <SidebarMenuItem>
+    <>
+      <SidebarMenu>
+        <SidebarMenuItem>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             {status === "loading" ? (
@@ -74,6 +103,24 @@ export function SidebarUserNav({ user }: { user: User }) {
             data-testid="user-nav-menu"
             side="top"
           >
+            {!isGuest && (
+              <>
+                <DropdownMenuItem
+                  asChild
+                  data-testid="user-nav-item-delete-all"
+                >
+                  <button
+                    className="flex w-full cursor-pointer items-center gap-2 text-[13px] text-destructive/70 hover:text-destructive focus:text-destructive"
+                    onClick={() => setShowDeleteAllDialog(true)}
+                    type="button"
+                  >
+                    <Trash2 className="size-3.5 shrink-0" />
+                    Tümünü sil
+                  </button>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+              </>
+            )}
             <DropdownMenuItem asChild data-testid="user-nav-item-auth">
               <button
                 className="w-full cursor-pointer text-[13px]"
@@ -105,5 +152,24 @@ export function SidebarUserNav({ user }: { user: User }) {
         </DropdownMenu>
       </SidebarMenuItem>
     </SidebarMenu>
+
+    <AlertDialog onOpenChange={setShowDeleteAllDialog} open={showDeleteAllDialog}>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Tüm sohbetler silinsin mi?</AlertDialogTitle>
+          <AlertDialogDescription>
+            Bu işlem geri alınamaz. Tüm sohbetleriniz kalıcı olarak
+            silinecek ve sunucularımızdan kaldırılacak.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel>Vazgeç</AlertDialogCancel>
+          <AlertDialogAction onClick={handleDeleteAll}>
+            Tümünü Sil
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+    </>
   );
 }
