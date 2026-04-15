@@ -16,6 +16,7 @@ import { useActiveChat } from "@/hooks/use-active-chat";
 import type { Attachment, ChatMessage } from "@/lib/types";
 import { StarField } from "@/components/landing/StarField";
 import { ChatHeader } from "./chat-header";
+import { GundemSorView } from "./gundem-sor-view";
 import { submitEditedMessage } from "./message-editor";
 import { Messages } from "./messages";
 import { MultimodalInput } from "./multimodal-input";
@@ -86,6 +87,7 @@ export function ChatShell() {
   const pathname = usePathname();
   const isBlankView =
     pathname === "/haberler-duyurular" || pathname === "/dokumanlar";
+  const isGundemView = pathname === "/gundem-sor";
 
   const [editingMessage, setEditingMessage] = useState<ChatMessage | null>(
     null
@@ -119,7 +121,9 @@ export function ChatShell() {
             {/* Anasayfa temalı arka plan katmanı */}
             <ChatBackground />
 
-            {!isBlankView && (
+            {isGundemView && <GundemSorView />}
+
+            {!isBlankView && !isGundemView && (
               <>
                 <Messages
                   addToolApprovalResponse={addToolApprovalResponse}
