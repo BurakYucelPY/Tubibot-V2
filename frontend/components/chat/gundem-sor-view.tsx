@@ -2,7 +2,7 @@
 
 import { ArrowUpIcon } from "lucide-react";
 import { motion } from "framer-motion";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Suggestion } from "@/components/ai-elements/suggestion";
 import {
   PromptInput,
@@ -90,6 +90,16 @@ export function GundemSorView() {
   const [input, setInput] = useState("");
   const [selectedModelId, setSelectedModelId] = useState(DEFAULT_CHAT_MODEL);
 
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      const textarea = document.querySelector<HTMLTextAreaElement>(
+        'textarea[name="message"]'
+      );
+      textarea?.focus();
+    }, 100);
+    return () => clearTimeout(timer);
+  }, []);
+
   return (
     <>
       <div className="relative z-1 flex flex-1 items-center justify-center px-4">
@@ -106,6 +116,7 @@ export function GundemSorView() {
           }}
         >
           <PromptInputTextarea
+            autoFocus
             className="min-h-24 text-[13px] leading-relaxed px-4 pt-3.5 pb-1.5 placeholder:text-muted-foreground/35"
             onChange={(e) => setInput(e.currentTarget.value)}
             placeholder="Gündem hakkında bir şey sorun..."
