@@ -1,6 +1,5 @@
 import "server-only";
 
-import type { VisibilityType } from "@/components/chat/visibility-selector";
 import {
   chatToDomain,
   loadStore,
@@ -26,7 +25,7 @@ export async function saveChat(args: {
   id: string;
   userId: string;
   title: string;
-  visibility: VisibilityType;
+  visibility: "private" | "public";
 }) {
   await mutateStore((store) => {
     const existingIdx = store.chats.findIndex((c) => c.id === args.id);
@@ -179,19 +178,6 @@ export async function deleteMessagesByChatIdAfterTimestamp(args: {
     store.messages = store.messages.filter(
       (m) => !(m.chatId === args.chatId && m.createdAt >= cutoff)
     );
-    return { store, result: undefined };
-  });
-}
-
-export async function updateChatVisibilityById(args: {
-  chatId: string;
-  visibility: "private" | "public";
-}) {
-  await mutateStore((store) => {
-    const idx = store.chats.findIndex((c) => c.id === args.chatId);
-    if (idx >= 0) {
-      store.chats[idx] = { ...store.chats[idx], visibility: args.visibility };
-    }
     return { store, result: undefined };
   });
 }
