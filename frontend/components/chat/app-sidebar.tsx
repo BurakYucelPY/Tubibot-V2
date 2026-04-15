@@ -73,7 +73,7 @@ export function AppSidebar({ user }: { user: User | undefined }) {
         </SidebarHeader>
         <SidebarContent>
           <SidebarGroup className="pt-2">
-            <div className="px-2 pb-2 text-xs font-semibold text-sidebar-foreground/50">
+            <div className="px-2 pb-2 text-xs font-semibold text-sidebar-foreground/50 group-data-[collapsible=icon]:hidden">
               SOHBET
             </div>
             <SidebarGroupContent>
@@ -106,7 +106,7 @@ export function AppSidebar({ user }: { user: User | undefined }) {
           </SidebarGroup>
 
           <SidebarGroup className="pt-2">
-            <div className="px-2 pb-2 text-xs font-semibold text-sidebar-foreground/50">
+            <div className="px-2 pb-2 text-xs font-semibold text-sidebar-foreground/50 group-data-[collapsible=icon]:hidden">
               GÜNCELLEMELER
             </div>
             <SidebarGroupContent>
