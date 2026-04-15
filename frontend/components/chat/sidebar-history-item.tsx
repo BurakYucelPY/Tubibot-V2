@@ -1,30 +1,12 @@
 import Link from "next/link";
 import { memo } from "react";
-import { useChatVisibility } from "@/hooks/use-chat-visibility";
 import type { Chat } from "@/lib/db/schema";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuPortal,
-  DropdownMenuSub,
-  DropdownMenuSubContent,
-  DropdownMenuSubTrigger,
-  DropdownMenuTrigger,
-} from "../ui/dropdown-menu";
 import {
   SidebarMenuAction,
   SidebarMenuButton,
   SidebarMenuItem,
 } from "../ui/sidebar";
-import {
-  CheckCircleFillIcon,
-  GlobeIcon,
-  LockIcon,
-  MoreHorizontalIcon,
-  ShareIcon,
-  TrashIcon,
-} from "./icons";
+import { TrashIcon } from "./icons";
 
 const PureChatItem = ({
   chat,
@@ -37,11 +19,6 @@ const PureChatItem = ({
   onDelete: (chatId: string) => void;
   setOpenMobile: (open: boolean) => void;
 }) => {
-  const { visibilityType, setVisibilityType } = useChatVisibility({
-    chatId: chat.id,
-    initialVisibilityType: chat.visibility,
-  });
-
   return (
     <SidebarMenuItem>
       <SidebarMenuButton
@@ -54,64 +31,15 @@ const PureChatItem = ({
         </Link>
       </SidebarMenuButton>
 
-      <DropdownMenu modal={true}>
-        <DropdownMenuTrigger asChild>
-          <SidebarMenuAction
-            className="mr-0.5 rounded-md text-sidebar-foreground/50 ring-0 transition-colors duration-150 focus-visible:ring-0 hover:text-sidebar-foreground data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
-            showOnHover={!isActive}
-          >
-            <MoreHorizontalIcon />
-            <span className="sr-only">Daha fazla</span>
-          </SidebarMenuAction>
-        </DropdownMenuTrigger>
-
-        <DropdownMenuContent align="end" side="bottom">
-          <DropdownMenuSub>
-            <DropdownMenuSubTrigger className="cursor-pointer">
-              <ShareIcon />
-              <span>Paylaş</span>
-            </DropdownMenuSubTrigger>
-            <DropdownMenuPortal>
-              <DropdownMenuSubContent>
-                <DropdownMenuItem
-                  className="cursor-pointer flex-row justify-between"
-                  onClick={() => {
-                    setVisibilityType("private");
-                  }}
-                >
-                  <div className="flex flex-row items-center gap-2">
-                    <LockIcon size={12} />
-                    <span>Özel</span>
-                  </div>
-                  {visibilityType === "private" ? (
-                    <CheckCircleFillIcon />
-                  ) : null}
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                  className="cursor-pointer flex-row justify-between"
-                  onClick={() => {
-                    setVisibilityType("public");
-                  }}
-                >
-                  <div className="flex flex-row items-center gap-2">
-                    <GlobeIcon />
-                    <span>Herkese açık</span>
-                  </div>
-                  {visibilityType === "public" ? <CheckCircleFillIcon /> : null}
-                </DropdownMenuItem>
-              </DropdownMenuSubContent>
-            </DropdownMenuPortal>
-          </DropdownMenuSub>
-
-          <DropdownMenuItem
-            onSelect={() => onDelete(chat.id)}
-            variant="destructive"
-          >
-            <TrashIcon />
-            <span>Sil</span>
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
+      <SidebarMenuAction
+        aria-label="Sohbeti sil"
+        className="mr-0.5 rounded-md text-sidebar-foreground/50 ring-0 transition-colors duration-150 focus-visible:ring-0 hover:text-destructive"
+        onClick={() => onDelete(chat.id)}
+        showOnHover={!isActive}
+      >
+        <TrashIcon />
+        <span className="sr-only">Sohbeti sil</span>
+      </SidebarMenuAction>
     </SidebarMenuItem>
   );
 };
