@@ -1,5 +1,6 @@
 "use client";
 
+import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import {
   AlertDialog,
@@ -82,6 +83,10 @@ export function ChatShell() {
     setShowCreditCardAlert,
   } = useActiveChat();
 
+  const pathname = usePathname();
+  const isBlankView =
+    pathname === "/haberler-duyurular" || pathname === "/dokumanlar";
+
   const [editingMessage, setEditingMessage] = useState<ChatMessage | null>(
     null
   );
@@ -114,66 +119,70 @@ export function ChatShell() {
             {/* Anasayfa temalı arka plan katmanı */}
             <ChatBackground />
 
-            <Messages
-              addToolApprovalResponse={addToolApprovalResponse}
-              chatId={chatId}
-              isLoading={isLoading}
-              isReadonly={isReadonly}
-              messages={messages}
-              onEditMessage={(msg) => {
-                const text = msg.parts
-                  ?.filter((p) => p.type === "text")
-                  .map((p) => p.text)
-                  .join("");
-                setInput(text ?? "");
-                setEditingMessage(msg);
-              }}
-              regenerate={regenerate}
-              selectedModelId={currentModelId}
-              setMessages={setMessages}
-              status={status}
-              votes={votes}
-            />
-
-            <div className="sticky bottom-0 z-1 mx-auto flex w-full max-w-4xl gap-2 border-t-0 bg-transparent px-2 pb-3 md:px-4 md:pb-4">
-              {!isReadonly && (
-                <MultimodalInput
-                  attachments={attachments}
+            {!isBlankView && (
+              <>
+                <Messages
+                  addToolApprovalResponse={addToolApprovalResponse}
                   chatId={chatId}
-                  editingMessage={editingMessage}
-                  input={input}
                   isLoading={isLoading}
+                  isReadonly={isReadonly}
                   messages={messages}
-                  onCancelEdit={() => {
-                    setEditingMessage(null);
-                    setInput("");
+                  onEditMessage={(msg) => {
+                    const text = msg.parts
+                      ?.filter((p) => p.type === "text")
+                      .map((p) => p.text)
+                      .join("");
+                    setInput(text ?? "");
+                    setEditingMessage(msg);
                   }}
-                  onModelChange={setCurrentModelId}
+                  regenerate={regenerate}
                   selectedModelId={currentModelId}
-                  selectedVisibilityType={visibilityType}
-                  sendMessage={
-                    editingMessage
-                      ? async () => {
-                        const msg = editingMessage;
-                        setEditingMessage(null);
-                        await submitEditedMessage({
-                          message: msg,
-                          text: input,
-                          setMessages,
-                          regenerate,
-                        });
-                        setInput("");
-                      }
-                      : sendMessage
-                  }
-                  setAttachments={setAttachments}
-                  setInput={setInput}
                   setMessages={setMessages}
                   status={status}
-                  stop={stop}
+                  votes={votes}
                 />
-              )}
-            </div>
+
+                <div className="sticky bottom-0 z-1 mx-auto flex w-full max-w-4xl gap-2 border-t-0 bg-transparent px-2 pb-3 md:px-4 md:pb-4">
+                  {!isReadonly && (
+                    <MultimodalInput
+                      attachments={attachments}
+                      chatId={chatId}
+                      editingMessage={editingMessage}
+                      input={input}
+                      isLoading={isLoading}
+                      messages={messages}
+                      onCancelEdit={() => {
+                        setEditingMessage(null);
+                        setInput("");
+                      }}
+                      onModelChange={setCurrentModelId}
+                      selectedModelId={currentModelId}
+                      selectedVisibilityType={visibilityType}
+                      sendMessage={
+                        editingMessage
+                          ? async () => {
+                            const msg = editingMessage;
+                            setEditingMessage(null);
+                            await submitEditedMessage({
+                              message: msg,
+                              text: input,
+                              setMessages,
+                              regenerate,
+                            });
+                            setInput("");
+                          }
+                          : sendMessage
+                      }
+                      setAttachments={setAttachments}
+                      setInput={setInput}
+                      setMessages={setMessages}
+                      status={status}
+                      stop={stop}
+                    />
+                  )}
+                </div>
+              </>
+            )}
           </div>
         </div>
       </div>
