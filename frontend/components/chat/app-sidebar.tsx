@@ -8,7 +8,6 @@ import {
   GlobeIcon,
   FileTextIcon,
 } from "lucide-react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import type { User } from "next-auth";
 import {
@@ -47,9 +46,9 @@ export function AppSidebar({ user }: { user: User | undefined }) {
                   className="size-8 !px-0 items-center justify-center group-data-[collapsible=icon]:group-hover/logo:opacity-0"
                   tooltip="Tubibot"
                 >
-                  <Link href="/" onClick={() => setOpenMobile(false)}>
+                  <div>
                     <MessageSquareIcon className="size-4 text-sidebar-foreground/50" />
-                  </Link>
+                  </div>
                 </SidebarMenuButton>
                 <Tooltip>
                   <TooltipTrigger asChild>
