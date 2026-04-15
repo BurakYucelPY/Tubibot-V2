@@ -77,7 +77,6 @@ export async function POST(request: Request) {
       id: chatId,
       userId,
       title: buildTitle(userText),
-      visibility: "private",
     });
   } else if (existing.userId !== userId) {
     return new Response("Forbidden", { status: 403 });
