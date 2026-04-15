@@ -94,6 +94,10 @@ export function AppSidebar({ user }: { user: User | undefined }) {
                 <SidebarMenuItem>
                   <SidebarMenuButton
                     className="h-8 rounded-lg border border-sidebar-border text-[13px] text-sidebar-foreground/70 transition-colors duration-150 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground"
+                    onClick={() => {
+                      setOpenMobile(false);
+                      router.push("/gundem-sor");
+                    }}
                     tooltip="Gündem Hakkında Sor"
                   >
                     <GlobeIcon className="size-4" />
