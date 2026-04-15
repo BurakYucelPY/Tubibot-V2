@@ -16,7 +16,9 @@ import { useActiveChat } from "@/hooks/use-active-chat";
 import type { Attachment, ChatMessage } from "@/lib/types";
 import { StarField } from "@/components/landing/StarField";
 import { ChatHeader } from "./chat-header";
+import { DokumanlarView } from "./dokumanlar-view";
 import { GundemSorView } from "./gundem-sor-view";
+import { HaberlerDuyurularView } from "./haberler-duyurular-view";
 import { submitEditedMessage } from "./message-editor";
 import { Messages } from "./messages";
 import { MultimodalInput } from "./multimodal-input";
@@ -84,8 +86,8 @@ export function ChatShell() {
   } = useActiveChat();
 
   const pathname = usePathname();
-  const isBlankView =
-    pathname === "/haberler-duyurular" || pathname === "/dokumanlar";
+  const isHaberlerView = pathname === "/haberler-duyurular";
+  const isDokumanlarView = pathname === "/dokumanlar";
   const isGundemView = pathname === "/gundem-sor";
 
   const [editingMessage, setEditingMessage] = useState<ChatMessage | null>(
@@ -118,7 +120,11 @@ export function ChatShell() {
 
             {isGundemView && <GundemSorView />}
 
-            {!isBlankView && !isGundemView && (
+            {isHaberlerView && <HaberlerDuyurularView />}
+
+            {isDokumanlarView && <DokumanlarView />}
+
+            {!isDokumanlarView && !isGundemView && !isHaberlerView && (
               <>
                 <Messages
                   addToolApprovalResponse={addToolApprovalResponse}
