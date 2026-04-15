@@ -14,8 +14,7 @@ CREATE TABLE IF NOT EXISTS "Chat" (
   "id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
   "createdAt" timestamp NOT NULL,
   "title" text NOT NULL,
-  "userId" uuid NOT NULL REFERENCES "User"("id"),
-  "visibility" varchar NOT NULL DEFAULT 'private'
+  "userId" uuid NOT NULL REFERENCES "User"("id")
 );
 
 CREATE TABLE IF NOT EXISTS "Message_v2" (

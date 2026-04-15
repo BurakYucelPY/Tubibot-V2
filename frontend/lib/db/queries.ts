@@ -25,7 +25,6 @@ export async function saveChat(args: {
   id: string;
   userId: string;
   title: string;
-  visibility: "private" | "public";
 }) {
   await mutateStore((store) => {
     const existingIdx = store.chats.findIndex((c) => c.id === args.id);
@@ -33,7 +32,6 @@ export async function saveChat(args: {
       id: args.id,
       userId: args.userId,
       title: args.title,
-      visibility: args.visibility,
       createdAt:
         existingIdx >= 0
           ? store.chats[existingIdx].createdAt
