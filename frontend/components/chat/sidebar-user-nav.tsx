@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronUp, Trash2 } from "lucide-react";
+import { ChevronUp, HomeIcon, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import type { User } from "next-auth";
 import { signOut, useSession } from "next-auth/react";
@@ -52,7 +52,6 @@ export function SidebarUserNav({ user }: { user: User }) {
 
   const handleDeleteAll = () => {
     setShowDeleteAllDialog(false);
-    router.replace("/");
     mutate(unstable_serialize(getChatHistoryPaginationKey), [], {
       revalidate: false,
     });
@@ -103,6 +102,17 @@ export function SidebarUserNav({ user }: { user: User }) {
             data-testid="user-nav-menu"
             side="top"
           >
+            <DropdownMenuItem asChild data-testid="user-nav-item-home">
+              <button
+                className="flex w-full cursor-pointer items-center gap-2 text-[13px]"
+                onClick={() => router.push("/")}
+                type="button"
+              >
+                <HomeIcon className="size-3.5 shrink-0" />
+                Anasayfaya dön
+              </button>
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
             {!isGuest && (
               <>
                 <DropdownMenuItem
