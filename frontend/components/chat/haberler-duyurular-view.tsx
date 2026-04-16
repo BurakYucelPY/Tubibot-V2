@@ -211,11 +211,11 @@ export function HaberlerDuyurularView() {
                   className="flex cursor-pointer flex-col items-start justify-between transition-opacity hover:opacity-80"
                   onClick={() => setSelectedItem(item)}
                 >
-                  <div className="relative w-full">
+                  <div className="relative w-full overflow-hidden rounded-2xl bg-muted">
                     <img
                       alt={item.baslik}
                       src={item.resim_url}
-                      className="aspect-video w-full rounded-2xl bg-muted object-contain sm:aspect-2/1 lg:aspect-3/2"
+                      className="h-52 w-full object-cover"
                     />
                     <div className="absolute inset-0 rounded-2xl inset-ring inset-ring-white/10" />
                   </div>
