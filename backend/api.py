@@ -1,4 +1,5 @@
 import asyncio
+import json
 import os
 import sys
 
@@ -141,3 +142,48 @@ async def chat(request: ChatRequest):
 @app.get("/api/health")
 async def health():
     return {"status": "ok", "service": "Tubibot V2"}
+
+
+# --- Duyuru & Haber Endpoints ---
+
+_dir = os.path.dirname(os.path.abspath(__file__))
+DUYURULAR_JSON = os.path.join(_dir, "duyurular.json")
+HABERLER_JSON = os.path.join(_dir, "haberler.json")
+
+
+def _read_json(path: str) -> list:
+    if not os.path.exists(path):
+        return []
+    try:
+        with open(path, "r", encoding="utf-8") as f:
+            return json.load(f)
+    except (json.JSONDecodeError, OSError):
+        return []
+
+
+@app.post("/api/icerikleri-guncelle")
+async def icerikleri_guncelle():
+    """Her iki scraper'ı çalıştırıp duyurular.json + haberler.json günceller."""
+    try:
+        from scraper_duyurular import run_scraper as run_duyurular
+        from scraper_haberler import run_scraper as run_haberler
+
+        duyurular = await asyncio.to_thread(run_duyurular)
+        haberler = await asyncio.to_thread(run_haberler)
+        return {
+            "status": "ok",
+            "duyuru_count": len(duyurular),
+            "haber_count": len(haberler),
+        }
+    except Exception as e:
+        return {"status": "error", "message": str(e)}
+
+
+@app.get("/api/duyurular")
+async def get_duyurular():
+    return _read_json(DUYURULAR_JSON)
+
+
+@app.get("/api/haberler")
+async def get_haberler():
+    return _read_json(HABERLER_JSON)
