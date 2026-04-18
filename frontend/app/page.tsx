@@ -38,8 +38,12 @@ function slugify(text: string): string {
 async function fetchLatestItems(): Promise<ContentItem[]> {
   try {
     const [dRes, hRes] = await Promise.all([
-      fetch(`${PYTHON_BACKEND_URL}/api/duyurular`, { cache: "no-store" }),
-      fetch(`${PYTHON_BACKEND_URL}/api/haberler`, { cache: "no-store" }),
+      fetch(`${PYTHON_BACKEND_URL}/api/duyurular`, {
+        next: { revalidate: 60 },
+      }),
+      fetch(`${PYTHON_BACKEND_URL}/api/haberler`, {
+        next: { revalidate: 60 },
+      }),
     ]);
     const duyurular: ContentItem[] = await dRes.json();
     const haberler: ContentItem[] = await hRes.json();
