@@ -32,6 +32,9 @@ export const chat = pgTable("Chat", {
   userId: uuid("userId")
     .notNull()
     .references(() => user.id),
+  kind: varchar("kind", { enum: ["default", "gundem"] })
+    .notNull()
+    .default("default"),
 });
 
 export type Chat = InferSelectModel<typeof chat>;
