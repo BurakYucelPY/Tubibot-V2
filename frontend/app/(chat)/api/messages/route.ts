@@ -21,6 +21,7 @@ export async function GET(request: Request) {
       messages: [],
       userId: null,
       isReadonly: false,
+      kind: "default",
     });
   }
 
@@ -32,5 +33,6 @@ export async function GET(request: Request) {
     messages: convertToUIMessages(messages),
     userId: chat.userId,
     isReadonly: false,
+    kind: chat.kind ?? "default",
   });
 }

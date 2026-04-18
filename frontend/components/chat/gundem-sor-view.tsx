@@ -1,8 +1,13 @@
 "use client";
 
-import { ArrowUpIcon } from "lucide-react";
+import { useChat } from "@ai-sdk/react";
+import { DefaultChatTransport } from "ai";
 import { motion } from "framer-motion";
-import { useEffect, useState } from "react";
+import { ArrowUpIcon } from "lucide-react";
+import { usePathname } from "next/navigation";
+import { useEffect, useRef, useState } from "react";
+import useSWR, { useSWRConfig } from "swr";
+import { unstable_serialize } from "swr/infinite";
 import { Suggestion } from "@/components/ai-elements/suggestion";
 import {
   PromptInput,
@@ -12,7 +17,10 @@ import {
   PromptInputTools,
 } from "@/components/ai-elements/prompt-input";
 import { DEFAULT_CHAT_MODEL } from "@/lib/ai/models";
-import { cn } from "@/lib/utils";
+import type { ChatMessage } from "@/lib/types";
+import { cn, fetcher, fetchWithErrorHandlers, generateUUID } from "@/lib/utils";
+import { getChatHistoryPaginationKey } from "./sidebar-history";
+import { Messages } from "./messages";
 import { ModelSelectorCompact } from "./multimodal-input";
 
 const GUNDEM_SUGGESTIONS = [
@@ -49,7 +57,7 @@ function GundemGreeting() {
 function GundemSuggestions({
   onSelect,
 }: {
-  onSelect: (question: string) => void;
+  onSelect: (question: string) => void | Promise<void>;
 }) {
   return (
     <div
@@ -87,10 +95,97 @@ function GundemSuggestions({
 }
 
 export function GundemSorView() {
+  const pathname = usePathname();
+  const { mutate } = useSWRConfig();
+
+  const urlChatId = pathname?.startsWith("/gundem-sor/")
+    ? pathname.split("/")[2]
+    : null;
+  const isNewChat = !urlChatId;
+
+  const newChatIdRef = useRef(generateUUID());
+  const prevPathnameRef = useRef(pathname);
+  if (isNewChat && prevPathnameRef.current !== pathname) {
+    newChatIdRef.current = generateUUID();
+  }
+  prevPathnameRef.current = pathname;
+
+  const chatId = urlChatId ?? newChatIdRef.current;
+
   const [input, setInput] = useState("");
   const [selectedModelId, setSelectedModelId] = useState(DEFAULT_CHAT_MODEL);
+  const selectedModelIdRef = useRef(selectedModelId);
+  selectedModelIdRef.current = selectedModelId;
+
+  const { data: chatData } = useSWR(
+    isNewChat
+      ? null
+      : `${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}/api/messages?chatId=${chatId}`,
+    fetcher,
+    { revalidateOnFocus: false }
+  );
+
+  const initialMessages: ChatMessage[] = isNewChat
+    ? []
+    : (chatData?.messages ?? []);
+
+  const {
+    messages,
+    setMessages,
+    sendMessage,
+    status,
+    regenerate,
+    addToolApprovalResponse,
+  } = useChat<ChatMessage>({
+    id: chatId,
+    messages: initialMessages,
+    generateId: generateUUID,
+    transport: new DefaultChatTransport({
+      api: `${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}/api/chat-gundem`,
+      fetch: fetchWithErrorHandlers,
+      prepareSendMessagesRequest(request) {
+        return {
+          body: {
+            id: request.id,
+            message: request.messages.at(-1),
+            selectedChatModel: selectedModelIdRef.current,
+            ...request.body,
+          },
+        };
+      },
+    }),
+    onFinish: () => {
+      mutate(unstable_serialize(getChatHistoryPaginationKey));
+    },
+  });
+
+  const loadedChatIds = useRef(new Set<string>());
+  useEffect(() => {
+    if (loadedChatIds.current.has(chatId)) {
+      return;
+    }
+    if (chatData?.messages) {
+      loadedChatIds.current.add(chatId);
+      setMessages(chatData.messages);
+    }
+  }, [chatId, chatData?.messages, setMessages]);
+
+  const prevChatIdRef = useRef(chatId);
+  useEffect(() => {
+    if (prevChatIdRef.current !== chatId) {
+      prevChatIdRef.current = chatId;
+      if (isNewChat) {
+        setMessages([]);
+      }
+    }
+  }, [chatId, isNewChat, setMessages]);
+
+  const hasMessages = messages.length > 0;
 
   useEffect(() => {
+    if (hasMessages) {
+      return;
+    }
     const timer = setTimeout(() => {
       const textarea = document.querySelector<HTMLTextAreaElement>(
         'textarea[name="message"]'
@@ -98,22 +193,58 @@ export function GundemSorView() {
       textarea?.focus();
     }, 100);
     return () => clearTimeout(timer);
-  }, []);
+  }, [hasMessages]);
+
+  const handleSubmit = (message: { text: string }) => {
+    const text = message.text.trim();
+    if (!text) {
+      return;
+    }
+    setInput("");
+    sendMessage({
+      role: "user",
+      parts: [{ type: "text", text }],
+    });
+  };
+
+  const isBusy = status === "submitted" || status === "streaming";
 
   return (
     <>
-      <div className="relative z-1 flex flex-1 items-center justify-center px-4">
-        <GundemGreeting />
-      </div>
+      {hasMessages ? (
+        <Messages
+          addToolApprovalResponse={addToolApprovalResponse}
+          chatId={chatId}
+          isLoading={false}
+          isReadonly={false}
+          messages={messages}
+          regenerate={regenerate}
+          selectedModelId={selectedModelId}
+          setMessages={setMessages}
+          status={status}
+          votes={undefined}
+        />
+      ) : (
+        <div className="relative z-1 flex flex-1 items-center justify-center px-4">
+          <GundemGreeting />
+        </div>
+      )}
 
       <div className="sticky bottom-0 z-1 mx-auto flex w-full max-w-4xl flex-col gap-4 border-t-0 bg-transparent px-2 pb-3 md:px-4 md:pb-4">
-        <GundemSuggestions onSelect={(q) => setInput(q)} />
+        {!hasMessages && (
+          <GundemSuggestions
+            onSelect={(q) =>
+              sendMessage({
+                role: "user",
+                parts: [{ type: "text", text: q }],
+              })
+            }
+          />
+        )}
 
         <PromptInput
           className="[&>div]:rounded-2xl [&>div]:border [&>div]:border-border/30 [&>div]:bg-card/70 [&>div]:shadow-[var(--shadow-composer)] [&>div]:transition-shadow [&>div]:duration-300 [&>div]:focus-within:shadow-[var(--shadow-composer-focus)]"
-          onSubmit={() => {
-            // Şimdilik işlevsiz — gündem RAG backend'i bağlanınca buraya sendMessage gelecek.
-          }}
+          onSubmit={handleSubmit}
         >
           <PromptInputTextarea
             autoFocus
@@ -132,12 +263,12 @@ export function GundemSorView() {
             <PromptInputSubmit
               className={cn(
                 "h-7 w-7 rounded-xl transition-all duration-200",
-                input.trim()
+                input.trim() && !isBusy
                   ? "bg-foreground text-background hover:opacity-85 active:scale-95"
                   : "bg-muted text-muted-foreground/25 cursor-not-allowed"
               )}
-              disabled={!input.trim()}
-              status="ready"
+              disabled={!input.trim() || isBusy}
+              status={isBusy ? "submitted" : "ready"}
               variant="secondary"
             >
               <ArrowUpIcon className="size-4" />

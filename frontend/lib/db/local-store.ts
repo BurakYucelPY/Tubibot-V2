@@ -9,6 +9,7 @@ export type StoredChat = {
   createdAt: string;
   title: string;
   userId: string;
+  kind?: "default" | "gundem";
 };
 
 export type StoredMessage = {
@@ -94,6 +95,7 @@ export function chatToDomain(row: StoredChat) {
     createdAt: new Date(row.createdAt),
     title: row.title,
     userId: row.userId,
+    kind: row.kind ?? "default",
   };
 }
 

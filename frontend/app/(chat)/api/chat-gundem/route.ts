@@ -4,12 +4,7 @@ import {
   generateId,
 } from "ai";
 import { auth } from "@/app/(auth)/auth";
-import {
-  deleteChatById,
-  getChatById,
-  saveChat,
-  saveMessages,
-} from "@/lib/db/queries";
+import { getChatById, saveChat, saveMessages } from "@/lib/db/queries";
 import { generateUUID } from "@/lib/utils";
 
 export const maxDuration = 60;
@@ -76,7 +71,7 @@ export async function POST(request: Request) {
     if (existing.userId !== userId) {
       return new Response("Forbidden", { status: 403 });
     }
-    if (existing.kind && existing.kind !== "default") {
+    if (existing.kind !== "gundem") {
       return new Response("Wrong chat kind", { status: 400 });
     }
   } else {
@@ -84,7 +79,7 @@ export async function POST(request: Request) {
       id: chatId,
       userId,
       title: buildTitle(userText),
-      kind: "default",
+      kind: "gundem",
     });
   }
 
@@ -108,7 +103,7 @@ export async function POST(request: Request) {
       const assistantId = generateUUID();
       let accumulated = "";
 
-      const response = await fetch(`${PYTHON_BACKEND_URL}/api/chat`, {
+      const response = await fetch(`${PYTHON_BACKEND_URL}/api/chat-gundem`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ message: userText, model: selectedChatModel }),
@@ -165,28 +160,4 @@ export async function POST(request: Request) {
   });
 
   return createUIMessageStreamResponse({ stream });
-}
-
-export async function DELETE(request: Request) {
-  const session = await auth();
-  if (!session?.user?.id) {
-    return new Response("Unauthorized", { status: 401 });
-  }
-
-  const { searchParams } = new URL(request.url);
-  const id = searchParams.get("id");
-  if (!id) {
-    return new Response("Missing id", { status: 400 });
-  }
-
-  const chat = await getChatById({ id });
-  if (!chat) {
-    return Response.json({ success: true }, { status: 200 });
-  }
-  if (chat.userId !== session.user.id) {
-    return new Response("Forbidden", { status: 403 });
-  }
-
-  const deleted = await deleteChatById({ id });
-  return Response.json({ success: true, deleted }, { status: 200 });
 }

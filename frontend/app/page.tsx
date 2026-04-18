@@ -1,71 +1,100 @@
 import { ChangelogArticle } from "@/components/landing/ChangelogArticle";
 import { LandingLayout } from "@/components/landing/Layout";
 
-export default function LandingPage() {
+const PYTHON_BACKEND_URL =
+  process.env.PYTHON_BACKEND_URL || "http://localhost:8000";
+
+type ContentItem = {
+  resim_url: string;
+  baslik: string;
+  tarih: string;
+  ozet: string;
+  kaynak_url: string;
+  tur: "duyuru" | "haber";
+};
+
+const TR_MONTHS: Record<string, number> = {
+  Oca: 1, Şub: 2, Mar: 3, Nis: 4, May: 5, Haz: 6,
+  Tem: 7, Ağu: 8, Eyl: 9, Eki: 10, Kas: 11, Ara: 12,
+};
+
+function parseTurkishDate(s: string): Date {
+  try {
+    const [day, month, year] = s.trim().split(" ");
+    return new Date(Number(year), (TR_MONTHS[month] ?? 1) - 1, Number(day));
+  } catch {
+    return new Date(0);
+  }
+}
+
+function slugify(text: string): string {
+  return text
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "")
+    .slice(0, 60);
+}
+
+async function fetchLatestItems(): Promise<ContentItem[]> {
+  try {
+    const [dRes, hRes] = await Promise.all([
+      fetch(`${PYTHON_BACKEND_URL}/api/duyurular`, {
+        next: { revalidate: 60 },
+      }),
+      fetch(`${PYTHON_BACKEND_URL}/api/haberler`, {
+        next: { revalidate: 60 },
+      }),
+    ]);
+    const duyurular: ContentItem[] = await dRes.json();
+    const haberler: ContentItem[] = await hRes.json();
+
+    const merged = [
+      ...(Array.isArray(duyurular) ? duyurular : []),
+      ...(Array.isArray(haberler) ? haberler : []),
+    ];
+
+    merged.sort(
+      (a, b) =>
+        parseTurkishDate(b.tarih).getTime() -
+        parseTurkishDate(a.tarih).getTime(),
+    );
+
+    return merged.slice(0, 5);
+  } catch {
+    return [];
+  }
+}
+
+export default async function LandingPage() {
+  const items = await fetchLatestItems();
+
   return (
     <LandingLayout>
-      <ChangelogArticle
-        id="2504-tubitak-cnr-italya"
-        date="2026-04-11T00:00Z"
-      >
-        <div className="relative overflow-hidden rounded-xl bg-gray-50 dark:bg-gray-900">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src="https://tubitak.gov.tr/sites/default/files/styles/original/public/2026-04/2504-TUBITAK_ITALYA_web_0.jpg.webp?itok=GdPCq6Qv"
-            alt="2504 TÜBİTAK–CNR İtalya İkili İş Birliği Çağrısı"
-            className="w-full"
-          />
-          <div className="pointer-events-none absolute inset-0 rounded-xl ring-1 ring-gray-900/10 ring-inset dark:ring-white/10" />
-        </div>
-        <h2>2504 TÜBİTAK–CNR (İtalya) İkili İş Birliği Çağrısı Açıldı</h2>
-        <p>
-          TÜBİTAK ve İtalya Ulusal Araştırma Kurumu (Italy National Research
-          Council-CNR) tarafından araştırma projeleri için ikili iş birliği
-          çağrısı yayınlandı.
-        </p>
-      </ChangelogArticle>
+      {items.map((item) => (
+        <ChangelogArticle
+          key={item.kaynak_url}
+          id={slugify(item.baslik)}
+          date={parseTurkishDate(item.tarih).toISOString()}
+        >
+          <div className="relative overflow-hidden rounded-xl bg-gray-50 dark:bg-gray-900">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={item.resim_url}
+              alt={item.baslik}
+              className="w-full"
+            />
+            <div className="pointer-events-none absolute inset-0 rounded-xl ring-1 ring-gray-900/10 ring-inset dark:ring-white/10" />
+          </div>
+          <h2>{item.baslik}</h2>
+          <p>{item.ozet}</p>
+        </ChangelogArticle>
+      ))}
 
-      <ChangelogArticle
-        id="1833-sayem-yesil-donusum"
-        date="2026-04-10T00:00Z"
-      >
-        <div className="relative overflow-hidden rounded-xl bg-gray-50 dark:bg-gray-900">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src="https://tubitak.gov.tr/sites/default/files/styles/original/public/2026-04/TEYDEB_1833_web-2026.jpg.webp?itok=ZqwRP5GM"
-            alt="1833 SAYEM Yeşil Dönüşüm 2026-1 Çağrısı"
-            className="w-full"
-          />
-          <div className="pointer-events-none absolute inset-0 rounded-xl ring-1 ring-gray-900/10 ring-inset dark:ring-white/10" />
-        </div>
-        <h2>1833 SAYEM Yeşil Dönüşüm 2026-1 Çağrısı 2. Aşaması Başvuruya Açıldı</h2>
-        <p>
-          1833 SAYEM Yeşil Dönüşüm 2026-1 Çağrısı&rsquo;nın ikinci aşaması
-          başvuruya açılmış olup başvuru süreci ve koşullarında önemli
-          güncellemeler yapılmıştır.
+      {items.length === 0 && (
+        <p className="mx-auto max-w-lg py-20 text-center text-gray-500">
+          Henüz içerik yüklenemedi. Backend sunucusunun çalıştığından emin olun.
         </p>
-      </ChangelogArticle>
-
-      <ChangelogArticle
-        id="dikey-inisli-roket-yarismasi"
-        date="2026-04-09T00:00Z"
-      >
-        <div className="relative overflow-hidden rounded-xl bg-gray-50 dark:bg-gray-900">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src="https://tubitak.gov.tr/sites/default/files/styles/original/public/2026-04/dikey-inisli-roket-2_web.jpg.webp?itok=i0kDL3Lt"
-            alt="Dikey İnişli Roket Yarışması"
-            className="w-full"
-          />
-          <div className="pointer-events-none absolute inset-0 rounded-xl ring-1 ring-gray-900/10 ring-inset dark:ring-white/10" />
-        </div>
-        <h2>Dikey İnişli Roket Yarışması Ön Tasarım Raporu Sonuçları Açıklandı</h2>
-        <p>
-          TEKNOFEST kapsamında düzenlenen Dikey İnişli Roket Yarışması&rsquo;nın
-          &ldquo;Ön Tasarım Raporu&rdquo; aşamasında başarılı olan takımlar bir
-          sonraki adım olarak &ldquo;Kritik Tasarım Raporu&rdquo; yükleyecekler.
-        </p>
-      </ChangelogArticle>
+      )}
     </LandingLayout>
   );
 }

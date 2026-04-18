@@ -88,7 +88,8 @@ export function ChatShell() {
   const pathname = usePathname();
   const isHaberlerView = pathname === "/haberler-duyurular";
   const isDokumanlarView = pathname === "/dokumanlar";
-  const isGundemView = pathname === "/gundem-sor";
+  const isGundemView =
+    pathname === "/gundem-sor" || pathname.startsWith("/gundem-sor/");
 
   const [editingMessage, setEditingMessage] = useState<ChatMessage | null>(
     null

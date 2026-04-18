@@ -1,20 +1,28 @@
 import os
 import sys
 
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..")))
 
 from langchain_chroma import Chroma
 from langchain_community.retrievers import BM25Retriever
 from langchain_core.documents import Document
 from TurkishStemmer import TurkishStemmer
 from sentence_transformers import CrossEncoder
+
 from src.database.vector_store import E5Embeddings
 
 # ====================================================================
-# Gelişmiş Retriever Pipeline:
+# Ortak (koordinatör) retriever modülü:
 # 1. Semantic Search (ChromaDB) — anlamsal benzerlik
 # 2. BM25 Keyword Search — terim eşleşmesi + Türkçe stopword
 # 3. Reciprocal Rank Fusion (RRF) — birleştirme + deduplication
+# 4. Cross-encoder reranker ile nihai yeniden sıralama
+#
+# Domain factory'leri ayrı dosyalarda:
+# - retriever_pdf.py     → get_retriever()
+# - retriever_gundem.py  → get_gundem_retriever()
+#
+# Dışarıya yönelik import sözleşmesi korunur (re-export dosya sonunda).
 # ====================================================================
 
 # Türkçe stopword listesi — BM25 skorlamasını anlamsız kelimelerin domine etmesini önler
@@ -36,27 +44,23 @@ TURKISH_STOPWORDS = {
 }
 
 
-def _load_vector_db_and_docs():
-    """ChromaDB'den vektör DB ve tüm dokümanları yükle."""
+def _load_vector_db_and_docs(persist_directory):
+    """Verilen Chroma persist dizininden vektör DB'yi + tüm Document'ları yükler."""
     model_name = "intfloat/multilingual-e5-large"
     embeddings = E5Embeddings(model_name=model_name)
-    # __file__ → backend/src/retrieval/retriever.py → 2 üst = backend/
-    _backend_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
-    persist_directory = os.path.join(_backend_root, "data", "vector_db")
 
     vector_db = Chroma(
         persist_directory=persist_directory,
-        embedding_function=embeddings
+        embedding_function=embeddings,
     )
 
-    # BM25 indeksi için tüm dokümanları al
     all_data = vector_db.get(include=["documents", "metadatas"])
 
     documents = []
     for i in range(len(all_data["documents"])):
         doc = Document(
             page_content=all_data["documents"][i],
-            metadata=all_data["metadatas"][i] if all_data["metadatas"] else {}
+            metadata=all_data["metadatas"][i] if all_data["metadatas"] else {},
         )
         documents.append(doc)
 
@@ -64,14 +68,10 @@ def _load_vector_db_and_docs():
 
 
 def _merge_results(vector_docs, bm25_docs):
-    """
-    İki retriever'ın sonuçlarını birleştir ve deduplicate et.
-    Reciprocal Rank Fusion (RRF) (k=60) ile adil skor birleştirme.
-    """
-    doc_scores = {}  # page_content hash -> (score, doc)
+    """İki retriever sonucunu RRF (k=60) ile birleştir ve deduplicate et."""
+    doc_scores = {}
     K = 60
 
-    # Vektör sonuçları (sıralamaya göre RRF)
     for rank, doc in enumerate(vector_docs):
         key = hash(doc.page_content)
         score = 1.0 / (K + rank)
@@ -80,7 +80,6 @@ def _merge_results(vector_docs, bm25_docs):
         else:
             doc_scores[key] = (score, doc)
 
-    # BM25 sonuçları (sıralamaya göre RRF)
     for rank, doc in enumerate(bm25_docs):
         key = hash(doc.page_content)
         score = 1.0 / (K + rank)
@@ -89,27 +88,15 @@ def _merge_results(vector_docs, bm25_docs):
         else:
             doc_scores[key] = (score, doc)
 
-    # Skorlara göre sırala
     sorted_docs = sorted(doc_scores.values(), key=lambda x: x[0], reverse=True)
     return [doc for _, doc in sorted_docs]
 
 
-# Sorgu anahtar kelimelerine göre belge türü eşleme
-# Eşleşme varsa, o türdeki chunk'lar RRF skorunda boost alır.
-QUERY_TYPE_HINTS = {
-    "basvuru_kosullari": ["başvur", "kimler", "kimler başvurabilir", "şart", "koşul", "uygunluk", "hak kazan"],
-    "cagri_duyurusu": ["bütçe", "limit", "süre", "takvim", "son tarih", "çağrı", "duyuru", "destek"],
-    "ska_rehberi": ["ska", "sürdürülebilir", "kalkınma", "hedef", "amaç", "gösterge"],
-    "oncelikli_alanlar": ["öncelikli", "alan", "öncelikli alan", "tema"],
-    "basvuru_formu": ["form", "öner", "araştırma önerisi", "yazım"],
-}
-
-
-def _detect_query_type_hints(query):
+def _detect_query_type_hints(query, hints_map):
     """Sorgu metnindeki anahtar kelimelere göre ilgili belge türlerini tespit et."""
     query_lower = query.lower()
     matched_types = set()
-    for doc_type, keywords in QUERY_TYPE_HINTS.items():
+    for doc_type, keywords in hints_map.items():
         for keyword in keywords:
             if keyword in query_lower:
                 matched_types.add(doc_type)
@@ -117,99 +104,152 @@ def _detect_query_type_hints(query):
     return matched_types
 
 
-def get_retriever():
-    """
-    Hybrid retriever döndürür: BM25 + Vektör (Reciprocal Rank Fusion).
-    Metadata bazlı boost ile ilgili belge türleri öne çıkarılır.
-    """
-    vector_db, embeddings, all_documents = _load_vector_db_and_docs()
+# Cross-encoder reranker'ı modül seviyesinde cache'le — iki factory paylaşsın
+_reranker_cache = None
 
-    # 1. Vektör (Semantic) Retriever
-    vector_retriever = vector_db.as_retriever(search_kwargs={"k": 10})
 
-    # Türkçe Kök Bulma + Stopword Kaldırma Ön İşlemcisi
+def _get_reranker():
+    global _reranker_cache
+    if _reranker_cache is None:
+        print("[INFO] Cross-encoder reranker yükleniyor...")
+        _reranker_cache = CrossEncoder("BAAI/bge-reranker-v2-m3")
+    return _reranker_cache
+
+
+class HybridRetriever:
+    """BM25 + Vektör (RRF) + metadata boost + cross-encoder reranking + sibling expansion."""
+
+    def __init__(
+        self,
+        vector_ret,
+        bm25_ret,
+        reranker_model,
+        all_docs,
+        hints_map,
+        top_k=8,
+        max_per_source=None,
+        sibling_expansion=True,
+    ):
+        self.vector_ret = vector_ret
+        self.bm25_ret = bm25_ret
+        self.reranker = reranker_model
+        self.all_docs = all_docs
+        self.hints_map = hints_map
+        self.top_k = top_k
+        self.max_per_source = max_per_source
+        self.sibling_expansion = sibling_expansion
+
+    def _apply_per_source_cap(self, ranked_docs):
+        """Aynı source_document'tan en fazla max_per_source chunk al."""
+        if self.max_per_source is None:
+            return ranked_docs
+        counts = {}
+        out = []
+        for doc in ranked_docs:
+            src = doc.metadata.get("source_document", "__unknown__")
+            if counts.get(src, 0) >= self.max_per_source:
+                continue
+            counts[src] = counts.get(src, 0) + 1
+            out.append(doc)
+        return out
+
+    def _expand_siblings(self, results, max_total=12):
+        """Aynı source_document'ten diğer chunk'ları ekle — liste/tablo bütünlüğü."""
+        existing_keys = {hash(d.page_content) for d in results}
+        sources_in_results = {d.metadata.get("source_document") for d in results}
+
+        siblings = []
+        for doc in self.all_docs:
+            src = doc.metadata.get("source_document")
+            key = hash(doc.page_content)
+            if src in sources_in_results and key not in existing_keys:
+                siblings.append(doc)
+                existing_keys.add(key)
+
+        return (results + siblings)[:max_total]
+
+    def invoke(self, query, config=None):
+        vector_results = self.vector_ret.invoke(query)
+        bm25_results = self.bm25_ret.invoke(query)
+        merged = _merge_results(vector_results, bm25_results)
+
+        type_hints = _detect_query_type_hints(query, self.hints_map)
+        if type_hints:
+            boosted = []
+            rest = []
+            for doc in merged:
+                if doc.metadata.get("document_type") in type_hints:
+                    boosted.append(doc)
+                else:
+                    rest.append(doc)
+            merged = boosted + rest
+
+        candidate_pool = self.top_k * 4 if self.max_per_source else self.top_k * 2
+        candidates = merged[:candidate_pool]
+        if candidates:
+            pairs = [[query, doc.page_content] for doc in candidates]
+            scores = self.reranker.predict(pairs)
+            scored_docs = sorted(zip(scores, candidates), key=lambda x: x[0], reverse=True)
+            ranked = [doc for _, doc in scored_docs]
+        else:
+            ranked = merged
+
+        ranked = self._apply_per_source_cap(ranked)
+        results = ranked[:self.top_k]
+
+        if self.sibling_expansion:
+            results = self._expand_siblings(results)
+        return results
+
+    def get_relevant_documents(self, query):
+        return self.invoke(query)
+
+
+def _build_retriever(
+    persist_directory,
+    hints_map,
+    top_k=8,
+    bm25_k=10,
+    vector_k=10,
+    max_per_source=None,
+    sibling_expansion=True,
+):
+    """Ortak factory: verilen Chroma DB + hint'ler için HybridRetriever kurar."""
+    vector_db, _embeddings, all_documents = _load_vector_db_and_docs(persist_directory)
+
+    vector_retriever = vector_db.as_retriever(search_kwargs={"k": vector_k})
+
     stemmer = TurkishStemmer()
 
     def turkish_preprocessor(text):
         tokens = text.lower().split()
         return [stemmer.stem(t) for t in tokens if t not in TURKISH_STOPWORDS]
 
-    # 2. BM25 (Keyword) Retriever
     bm25_retriever = BM25Retriever.from_documents(
         all_documents,
-        k=10,
-        preprocess_func=turkish_preprocessor
+        k=bm25_k,
+        preprocess_func=turkish_preprocessor,
     )
 
-    # 3. Cross-Encoder Reranker
-    print("[INFO] Cross-encoder reranker yükleniyor...")
-    reranker = CrossEncoder("BAAI/bge-reranker-v2-m3")
+    reranker = _get_reranker()
 
-    class HybridRetriever:
-        """BM25 + Vektör (RRF) + metadata boost + cross-encoder reranking + sibling expansion."""
+    return HybridRetriever(
+        vector_ret=vector_retriever,
+        bm25_ret=bm25_retriever,
+        reranker_model=reranker,
+        all_docs=all_documents,
+        hints_map=hints_map,
+        top_k=top_k,
+        max_per_source=max_per_source,
+        sibling_expansion=sibling_expansion,
+    )
 
-        def __init__(self, vector_ret, bm25_ret, reranker_model, all_docs, top_k=8):
-            self.vector_ret = vector_ret
-            self.bm25_ret = bm25_ret
-            self.reranker = reranker_model
-            self.all_docs = all_docs
-            self.top_k = top_k
 
-        def _expand_siblings(self, results, max_total=12):
-            """
-            Sonuçlardaki belgelerin kardeş chunk'larını dahil et.
-            Bir belgenin bir chunk'ı bulunduysa, aynı source_document'tan
-            diğer chunk'ları da ekle — liste/tablo bütünlüğünü sağlar.
-            """
-            existing_keys = {hash(d.page_content) for d in results}
-            sources_in_results = {d.metadata.get("source_document") for d in results}
-
-            siblings = []
-            for doc in self.all_docs:
-                src = doc.metadata.get("source_document")
-                key = hash(doc.page_content)
-                if src in sources_in_results and key not in existing_keys:
-                    siblings.append(doc)
-                    existing_keys.add(key)
-
-            return (results + siblings)[:max_total]
-
-        def invoke(self, query, config=None):
-            # E5Embeddings "query: " prefix'ini otomatik ekler
-            vector_results = self.vector_ret.invoke(query)
-            bm25_results = self.bm25_ret.invoke(query)
-            merged = _merge_results(vector_results, bm25_results)
-
-            # Metadata bazlı boost: sorguyla ilgili belge türlerini öne çıkar
-            type_hints = _detect_query_type_hints(query)
-            if type_hints:
-                boosted = []
-                rest = []
-                for doc in merged:
-                    if doc.metadata.get("document_type") in type_hints:
-                        boosted.append(doc)
-                    else:
-                        rest.append(doc)
-                merged = boosted + rest
-
-            # Cross-encoder ile nihai yeniden sıralama (top_k * 2 aday üzerinde)
-            candidates = merged[:self.top_k * 2]
-            if candidates:
-                pairs = [[query, doc.page_content] for doc in candidates]
-                scores = self.reranker.predict(pairs)
-                scored_docs = sorted(zip(scores, candidates), key=lambda x: x[0], reverse=True)
-                results = [doc for _, doc in scored_docs[:self.top_k]]
-            else:
-                results = merged[:self.top_k]
-
-            # Sibling expansion: aynı belgeden eksik chunk'ları dahil et
-            results = self._expand_siblings(results)
-            return results
-
-        def get_relevant_documents(self, query):
-            return self.invoke(query)
-
-    return HybridRetriever(vector_retriever, bm25_retriever, reranker, all_documents, top_k=8)
+# Aşağıdaki re-export'lar DOSYANIN SONUNDA olmalı — circular import için kritik.
+# retriever_pdf / retriever_gundem modülleri yukarıdaki _build_retriever'ı import ediyor;
+# onu buradan re-export etmek için tanımın tamamlanmış olması gerekir.
+from src.retrieval.retriever_pdf import get_retriever  # noqa: E402, F401
+from src.retrieval.retriever_gundem import get_gundem_retriever  # noqa: E402, F401
 
 
 if __name__ == "__main__":
