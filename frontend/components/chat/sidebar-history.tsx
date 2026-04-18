@@ -101,7 +101,12 @@ export function getChatHistoryPaginationKey(
 export function SidebarHistory({ user }: { user: User | undefined }) {
   const { setOpenMobile } = useSidebar();
   const pathname = usePathname();
-  const id = pathname?.startsWith("/chat/") ? pathname.split("/")[2] : null;
+  let id: string | null = null;
+  if (pathname?.startsWith("/chat/")) {
+    id = pathname.split("/")[2];
+  } else if (pathname?.startsWith("/gundem-sor/")) {
+    id = pathname.split("/")[2];
+  }
 
   const {
     data: paginatedChatHistories,
