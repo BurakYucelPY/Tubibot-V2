@@ -72,14 +72,20 @@ export async function POST(request: Request) {
       : "groq/llama-3.3-70b";
 
   const existing = await getChatById({ id: chatId });
-  if (!existing) {
+  if (existing) {
+    if (existing.userId !== userId) {
+      return new Response("Forbidden", { status: 403 });
+    }
+    if (existing.kind && existing.kind !== "default") {
+      return new Response("Wrong chat kind", { status: 400 });
+    }
+  } else {
     await saveChat({
       id: chatId,
       userId,
       title: buildTitle(userText),
+      kind: "default",
     });
-  } else if (existing.userId !== userId) {
-    return new Response("Forbidden", { status: 403 });
   }
 
   const userMessageId = incoming?.id ?? generateUUID();
