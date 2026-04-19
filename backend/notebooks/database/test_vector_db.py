@@ -3,7 +3,9 @@ TEST 3: Vektör DB Metadata Kontrolü
 Vektör veritabanındaki chunk'larda metadata bilgisinin doğru şekilde bulunup bulunmadığını test eder.
 """
 import os, sys
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+from _helpers.bootstrap import setup_backend_path
+BACKEND_ROOT = setup_backend_path()
 
 PASS = "✅ GEÇTI"
 FAIL = "❌ BASARISIZ"
@@ -18,8 +20,7 @@ def test_vector_db_metadata():
     from src.database.vector_store import E5Embeddings
 
     embeddings = E5Embeddings(model_name="intfloat/multilingual-e5-large")
-    _backend_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
-    vector_db = Chroma(persist_directory=os.path.join(_backend_root, "data", "vector_db"), embedding_function=embeddings)
+    vector_db = Chroma(persist_directory=os.path.join(BACKEND_ROOT, "data", "vector_db"), embedding_function=embeddings)
     
     sample = vector_db.get(limit=10, include=["metadatas"])
     
