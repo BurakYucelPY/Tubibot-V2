@@ -1,0 +1,44 @@
+[
+  {
+    "question": "2209-A'ya kimler başvuru yapabilir?",
+    "must_contain_source_substr": ["2209", "basvur", "kimler"],
+    "must_contain_terms_any": ["lisans", "öğrenci", "tübitak", "2209"],
+    "domain": "2209-A"
+  },
+  {
+    "question": "2209-A başvuru takvimi nedir?",
+    "must_contain_source_substr": ["2209", "cagri", "duyuru"],
+    "must_contain_terms_any": ["başvur", "tarih", "takvim", "2025"],
+    "domain": "2209-A"
+  },
+  {
+    "question": "TÜBİTAK 2209-A proje önerisi formunda hangi bölümler yer alır?",
+    "must_contain_source_substr": ["2209", "form"],
+    "must_contain_terms_any": ["proje", "öner", "yöntem", "özgün", "amaç"],
+    "domain": "2209-A"
+  },
+  {
+    "question": "SKA 13 iklim değişikliği hedefleri nelerdir?",
+    "must_contain_source_substr": ["SKA", "Sürdürülebilir"],
+    "must_contain_terms_any": ["iklim", "sera", "sürdürülebilir", "kalkınma", "hedef"],
+    "domain": "SKA"
+  },
+  {
+    "question": "Sürdürülebilir kalkınma amaçları kaç tanedir?",
+    "must_contain_source_substr": ["SKA", "Sürdürülebilir"],
+    "must_contain_terms_any": ["17", "sürdürülebilir", "kalkınma", "amaç", "hedef"],
+    "domain": "SKA"
+  },
+  {
+    "question": "Öncelikli alanlar hangileridir?",
+    "must_contain_source_substr": ["ncelikli"],
+    "must_contain_terms_any": ["öncelikli", "alan", "teknoloji", "sağlık", "enerji"],
+    "domain": "oncelikli_alanlar"
+  },
+  {
+    "question": "2209-A programında araştırma önerisi formu nasıl doldurulur?",
+    "must_contain_source_substr": ["2209", "form"],
+    "must_contain_terms_any": ["araştırma", "öneri", "form", "proje", "yöntem"],
+    "domain": "2209-A"
+  }
+]
