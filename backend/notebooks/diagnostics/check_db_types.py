@@ -1,13 +1,14 @@
 """Vektör DB'deki tüm belge türlerini kontrol et."""
 import os, sys
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+from _helpers.bootstrap import setup_backend_path
+BACKEND_ROOT = setup_backend_path()
 
 from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_chroma import Chroma
 
 embeddings = HuggingFaceEmbeddings(model_name="intfloat/multilingual-e5-large")
-_backend_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
-db = Chroma(persist_directory=os.path.join(_backend_root, "data", "vector_db"), embedding_function=embeddings)
+db = Chroma(persist_directory=os.path.join(BACKEND_ROOT, "data", "vector_db"), embedding_function=embeddings)
 
 all_data = db.get(include=["metadatas"])
 
