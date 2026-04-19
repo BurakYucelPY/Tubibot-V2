@@ -3,7 +3,9 @@ TEST 4: Hybrid Retrieval (BM25 + Vektör)
 BM25 ve Vektör arama sonuçlarının hybrid olarak birleştirilmesini test eder.
 """
 import os, sys
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+from _helpers.bootstrap import setup_backend_path
+BACKEND_ROOT = setup_backend_path()
 
 PASS = "✅ GEÇTI"
 FAIL = "❌ BASARISIZ"
@@ -15,8 +17,9 @@ def test_hybrid_retrieval():
     print("TEST 4: Hybrid Retrieval (BM25 + Vektör)")
     print("="*60)
     from src.retrieval.retriever import _load_vector_db_and_docs, _merge_results
-    
-    vector_db, embeddings, all_docs = _load_vector_db_and_docs()
+
+    persist_dir = os.path.join(BACKEND_ROOT, "data", "vector_db")
+    vector_db, embeddings, all_docs = _load_vector_db_and_docs(persist_dir)
     
     print(f"  BM25 indeksi için yüklenen doküman sayısı: {len(all_docs)}")
     docs_ok = len(all_docs) > 0
