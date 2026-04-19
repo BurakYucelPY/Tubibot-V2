@@ -3,7 +3,9 @@ TEST 1: Metadata Zenginleştirme
 PDF dosyalarına doğru metadata'nın eklenip eklenmediğini test eder.
 """
 import os, sys
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+from _helpers.bootstrap import setup_backend_path
+setup_backend_path()
 
 PASS = "✅ GEÇTI"
 FAIL = "❌ BASARISIZ"
@@ -17,13 +19,7 @@ def test_metadata_enrichment():
     from src.ingestion.pdf_loader import PDF_METADATA_MAP, _get_metadata_for_file
     
     # Yeni PDF'lerin mapping'de olmalı
-    expected_files = [
-        "2209-A_2025_Cagri_Duyurusu.pdf",
-        "2209-A_arastirma_onerisi_formu_09102025.pdf",
-        "Öncelikli Alanlar.pdf",
-        "SKA_Surdurulebilir_Kalkinma.pdf",
-        "kimlerbasvurur.pdf"
-    ]
+    expected_files = list(PDF_METADATA_MAP.keys())
     
     all_ok = True
     for f in expected_files:
