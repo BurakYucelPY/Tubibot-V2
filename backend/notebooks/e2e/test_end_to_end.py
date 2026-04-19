@@ -3,7 +3,9 @@ TEST 6: Uçtan Uca Test
 Gerçek sorularla RAG pipeline'ın tam çalışmasını test eder.
 """
 import os, sys
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+from _helpers.bootstrap import setup_backend_path
+setup_backend_path()
 
 PASS = "✅ GEÇTI"
 FAIL = "❌ BASARISIZ"
