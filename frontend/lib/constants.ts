@@ -14,7 +14,7 @@ export const DUMMY_PASSWORD = generateDummyPassword();
 
 export const suggestions = [
   "TÜBİTAK 2209-A başvuru şartları nelerdir?",
-  "Proje bütçesi nasıl hazırlanır?",
-  "TÜBİTAK öncelikli alanlarını liste halinde paylaşır mısın?",
-  "Proje önerisi yazarken nelere dikkat etmeliyim?",
+  "1001 ARDEB başvurusunda nelere dikkat etmeliyim?",
+  "Mali rapor nasıl hazırlanır?",
+  "TÜBİTAK öncelikli alanlar nelerdir?",
 ];
