@@ -32,7 +32,7 @@ const GUNDEM_SUGGESTIONS = [
 
 function GundemGreeting() {
   return (
-    <div className="flex flex-col items-center px-4" key="gundem-overview">
+    <div className="flex select-none flex-col items-center px-4" key="gundem-overview">
       <motion.div
         animate={{ opacity: 1, y: 0 }}
         className="text-center font-semibold text-2xl tracking-tight text-foreground md:text-3xl"
