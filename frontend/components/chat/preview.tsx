@@ -27,7 +27,7 @@ export function Preview() {
             Size nasıl yardımcı olabilirim?
           </h2>
           <p className="mt-1.5 text-sm text-muted-foreground">
-            TÜBİTAK 2209-A hakkında bir soru sorun.
+            TÜBİTAK destek programları, burslar ve başvuru rehberleri hakkında sorabilirsiniz.
           </p>
         </div>
 

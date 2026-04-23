@@ -17,7 +17,7 @@ export const Greeting = () => {
         initial={{ opacity: 0, y: 10 }}
         transition={{ delay: 0.5, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
       >
-        TÜBİTAK 2209-A hakkında bir soru sorun.
+        TÜBİTAK destek programları, burslar ve başvuru rehberleri hakkında sorabilirsiniz.
       </motion.div>
     </div>
   );
