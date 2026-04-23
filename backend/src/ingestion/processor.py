@@ -12,6 +12,7 @@ from langchain_text_splitters import RecursiveCharacterTextSplitter
 
 # Belge türüne göre farklı chunking stratejileri
 CHUNK_CONFIG = {
+    # Mevcut (korunur):
     "ska_rehberi": {"chunk_size": 1500, "chunk_overlap": 300},      # SKA hedefleri uzun metinler
     "cagri_duyurusu": {"chunk_size": 800, "chunk_overlap": 200},    # Kısa maddeler
     "basvuru_formu": {"chunk_size": 800, "chunk_overlap": 200},     # Form maddeleri
@@ -19,6 +20,21 @@ CHUNK_CONFIG = {
     "oncelikli_alanlar": {"chunk_size": 5000, "chunk_overlap": 200},# Kısa liste — tek chunk
     "duyuru": {"chunk_size": 1000, "chunk_overlap": 200},           # Scrape edilen duyurular
     "haber": {"chunk_size": 1000, "chunk_overlap": 200},            # Scrape edilen haberler
+    # YENİ (TübitakBilgi_pdf genişletmesi):
+    "ardeb_1001_basvuru":       {"chunk_size": 800,  "chunk_overlap": 200},
+    "ardeb_1002_basvuru":       {"chunk_size": 1200, "chunk_overlap": 250},
+    "ardeb_proje_yonetmeligi":  {"chunk_size": 1500, "chunk_overlap": 250},
+    "bideb_burs_2211a":         {"chunk_size": 800,  "chunk_overlap": 200},
+    "bideb_burs_2219":          {"chunk_size": 800,  "chunk_overlap": 200},
+    "2209b_rehberi":            {"chunk_size": 800,  "chunk_overlap": 200},
+    "teydeb_uygulama_esaslari": {"chunk_size": 1000, "chunk_overlap": 200},
+    "teydeb_yonetmeligi":       {"chunk_size": 1000, "chunk_overlap": 200},
+    "mali_esaslar":             {"chunk_size": 1000, "chunk_overlap": 200},
+    "mali_rapor_kilavuzu":      {"chunk_size": 1200, "chunk_overlap": 250},
+    "fikri_haklar":             {"chunk_size": 1000, "chunk_overlap": 200},
+    "yazim_rehberi":            {"chunk_size": 800,  "chunk_overlap": 200},
+    "stratejik_plan":           {"chunk_size": 1200, "chunk_overlap": 300},
+    "faaliyet_raporu":          {"chunk_size": 1200, "chunk_overlap": 300},
     "default": {"chunk_size": 1000, "chunk_overlap": 200},          # Fallback
 }
 
@@ -68,16 +84,15 @@ def _filter_noise(raw_documents):
 
 
 def _filter_short_chunks(chunks):
-    """Aşama 3: Çok kısa chunk'ları at. oncelikli_alanlar için 15, diğerleri için 50 char alt sınır."""
-    print("\n[INFO] Aşama 3: Kısa Chunk Filtreleme.")
-    kept = []
-    for chunk in chunks:
-        doc_type = chunk.metadata.get("document_type", "")
-        min_length = 15 if doc_type == "oncelikli_alanlar" else 50
-        if len(chunk.page_content.strip()) < min_length:
-            continue
-        kept.append(chunk)
-    print(f"[INFO] {len(chunks) - len(kept)} kısa/boş chunk filtrelendi.")
+    """Aşama 3: Yalnızca tamamen boş chunk'ları at (bilgi kaybını önlemek için).
+
+    Eski davranışta 50 char (oncelikli_alanlar için 15 char) alt sınır vardı;
+    tek satırlık madde numaraları veya kısa başlıklar kaybolabiliyordu.
+    Şimdi: strip() sonrası uzunluk > 0 olan her chunk korunur.
+    """
+    print("\n[INFO] Aşama 3: Kısa Chunk Filtreleme (yalnız boş olanlar atılır).")
+    kept = [c for c in chunks if len(c.page_content.strip()) > 0]
+    print(f"[INFO] {len(chunks) - len(kept)} boş chunk filtrelendi.")
     return kept
 
 
