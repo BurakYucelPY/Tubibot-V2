@@ -3,7 +3,9 @@ def format_docs_plain(docs):
     for doc in docs:
         source = doc.metadata.get("source_document", "Bilinmeyen Belge")
         section = doc.metadata.get("section_heading", "Genel")
-        header = f"[Kaynak: {source} | Bölüm: {section}]"
+        program = doc.metadata.get("program", "")
+        program_str = f" | Program: {program}" if program else ""
+        header = f"[Kaynak: {source}{program_str} | Bölüm: {section}]"
         formatted_parts.append(f"{header}\n{doc.page_content}")
     return "\n\n---\n\n".join(formatted_parts)
 
