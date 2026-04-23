@@ -31,8 +31,19 @@ def build_vector_database():
     print("\n[INFO] Vektör Veritabanı (Vector DB) inşa süreci başlatılıyor...")
 
     _backend_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
-    raw_data_path = os.path.join(_backend_root, "data", "2209A_pdf")
-    raw_docs = load_pdfs(raw_data_path)
+    raw_data_paths = [
+        os.path.join(_backend_root, "data", "2209A_pdf"),
+        os.path.join(_backend_root, "data", "TübitakBilgi_pdf"),
+    ]
+
+    raw_docs = []
+    for path in raw_data_paths:
+        if not os.path.isdir(path):
+            print(f"[WARN] Klasör bulunamadı, atlanıyor: {path}")
+            continue
+        print(f"[INFO] Yükleniyor: {path}")
+        raw_docs.extend(load_pdfs(path))
+
     chunks = process_and_chunk_documents(raw_docs)
 
     # Kompleks metadata temizliği (piksel koordinatları vb.)
