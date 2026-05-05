@@ -198,6 +198,249 @@ PDF_METADATA_MAP = {
         "program": "TÜBİTAK",
         "year": "2024",
     },
+    # ---------------- Faz 2: TübitakBilgi_pdf'e eklenen 38 yeni PDF ----------------
+    # Etik Yönetmelikleri (etik_yonetmeligi)
+    "TÜBİTAK Araştırma ve Yayın Etiği Kurulu (AYEK) Yönetmeliği.pdf": {
+        "source_document": "TÜBİTAK AYEK Yönetmeliği",
+        "document_type": "etik_yonetmeligi",
+        "program": "TÜBİTAK",
+        "year": "2025",
+    },
+    "Tübitak Araştırma ve Yayın Etiği Kurulu Yönetmeliği'nde Değişiklik Yapılmasına Dair Yönetmelik.pdf": {
+        "source_document": "TÜBİTAK AYEK Yönetmeliği Değişiklik",
+        "document_type": "etik_yonetmeligi",
+        "program": "TÜBİTAK",
+        "year": "2025",
+    },
+    "TÜBİTAK Endüstriyel Etik Kurulu (ENDEK) Yönetmeliği.pdf": {
+        "source_document": "TÜBİTAK ENDEK Yönetmeliği",
+        "document_type": "etik_yonetmeligi",
+        "program": "TÜBİTAK",
+        "year": "2025",
+    },
+    "TÜBİTAK Hayvan Deneyleri Yerel Etik Kurulu (HADYEK) Yönergesi.pdf": {
+        "source_document": "TÜBİTAK HADYEK Yönergesi",
+        "document_type": "etik_yonetmeligi",
+        "program": "TÜBİTAK",
+        "year": "2025",
+    },
+    "Hayvan Deneyleri Etik Kurullarının Çalışma Usul ve Esaslarına Dair Yönetmelik.pdf": {
+        "source_document": "Hayvan Deneyleri Etik Kurulları Yönetmeliği",
+        "document_type": "etik_yonetmeligi",
+        "program": "Sağlık Bakanlığı",
+        "year": "2025",
+    },
+    "Beşeri Tıbbi Ürünlerin Klinik Araştırmaları Hakkında Yönetmelik.pdf": {
+        "source_document": "Beşeri Tıbbi Ürünlerin Klinik Araştırmaları Yönetmeliği",
+        "document_type": "etik_yonetmeligi",
+        "program": "Sağlık Bakanlığı",
+        "year": "2025",
+    },
+    "İlaç ve Biyolojik Ürünlerin Klinik Araştırmaları Hakkında Yönetmelik.pdf": {
+        "source_document": "İlaç ve Biyolojik Ürünlerin Klinik Araştırmaları Yönetmeliği",
+        "document_type": "etik_yonetmeligi",
+        "program": "Sağlık Bakanlığı",
+        "year": "2025",
+    },
+    # Etik Bilgi Notları (etik_belgesi)
+    "Etik Kurul Onay Belgesi Bilgi Notu ARDEB.pdf": {
+        "source_document": "Etik Kurul Onay Belgesi Bilgi Notu (ARDEB)",
+        "document_type": "etik_belgesi",
+        "program": "ARDEB",
+        "year": "2025",
+    },
+    "etik_kurul_onay_belgesi_bilgi_notu_teydeb.pdf": {
+        "source_document": "Etik Kurul Onay Belgesi Bilgi Notu (TEYDEB)",
+        "document_type": "etik_belgesi",
+        "program": "TEYDEB",
+        "year": "2025",
+    },
+    "YasalÖzel İzin Belgesi Bilgi Notu ARDEB.pdf": {
+        "source_document": "Yasal/Özel İzin Belgesi Bilgi Notu (ARDEB)",
+        "document_type": "etik_belgesi",
+        "program": "ARDEB",
+        "year": "2025",
+    },
+    "yasal_ozel_izin_belgesi_bilgi_notu_ARDEB.pdf": {
+        "source_document": "Yasal/Özel İzin Belgesi Bilgi Notu (ARDEB) - 2",
+        "document_type": "etik_belgesi",
+        "program": "ARDEB",
+        "year": "2025",
+    },
+    # AGY Form Hazırlama Kılavuzları (agy_kilavuzu)
+    "AGY100-101 Proje Öneri Bilgileri Formu Hazırlama Kılavuzu.pdf": {
+        "source_document": "AGY100-101 Proje Öneri Bilgileri Formu Hazırlama Kılavuzu",
+        "document_type": "agy_kilavuzu",
+        "program": "TÜBİTAK",
+        "year": "2025",
+    },
+    "AGY200-201 Proje Öneri Değerlendirme Raporu Hazırlama Kılavuzu.pdf": {
+        "source_document": "AGY200-201 Proje Öneri Değerlendirme Raporu Hazırlama Kılavuzu",
+        "document_type": "agy_kilavuzu",
+        "program": "TÜBİTAK",
+        "year": "2025",
+    },
+    "AGY400 Dönemsel İzleme Raporu Hazırlama Kılavuzu.pdf": {
+        "source_document": "AGY400 Dönemsel İzleme Raporu Hazırlama Kılavuzu",
+        "document_type": "agy_kilavuzu",
+        "program": "TÜBİTAK",
+        "year": "2025",
+    },
+    "TEYDEB 1501-1507 Proje Öneri Bilgileri Formu AGY100-101 Hazırlama Kılavuzu.pdf": {
+        "source_document": "TEYDEB 1501-1507 AGY100-101 Hazırlama Kılavuzu",
+        "document_type": "agy_kilavuzu",
+        "program": "TEYDEB",
+        "year": "2025",
+    },
+    # AGY500 → mevcut mali_rapor_kilavuzu tipine atanır (içeriği mali rapor)
+    "AGY500 Mali Müşavirlik Proje Harcamaları Değerlendirme-Mali Rapor Hazırlama Kılavuzu.pdf": {
+        "source_document": "AGY500 Mali Müşavirlik Mali Rapor Hazırlama Kılavuzu",
+        "document_type": "mali_rapor_kilavuzu",
+        "program": "TÜBİTAK",
+        "year": "2025",
+    },
+    # Değerlendirme Formları/Kriterleri (degerlendirme_formu)
+    "4004 Proje Önerisi Değerlendirme Formu.pdf": {
+        "source_document": "4004 Proje Önerisi Değerlendirme Formu",
+        "document_type": "degerlendirme_formu",
+        "program": "4004 BİDEB",
+        "year": "2025",
+    },
+    "4007 Bilim Şenlikleri Değerlendirme Kriterleri.pdf": {
+        "source_document": "4007 Bilim Şenlikleri Değerlendirme Kriterleri",
+        "document_type": "degerlendirme_formu",
+        "program": "4007 BİDEB",
+        "year": "2025",
+    },
+    "TEYDEB 1501-1507 Proje Öneri Değerlendirme Raporu.pdf": {
+        "source_document": "TEYDEB 1501-1507 Proje Öneri Değerlendirme Raporu",
+        "document_type": "degerlendirme_formu",
+        "program": "TEYDEB",
+        "year": "2025",
+    },
+    "TÜBİTAK Değerlendirme Kriterleri Açıklamaları.pdf": {
+        "source_document": "TÜBİTAK Değerlendirme Kriterleri Açıklamaları",
+        "document_type": "degerlendirme_formu",
+        "program": "TÜBİTAK",
+        "year": "2025",
+    },
+    # TÜBİTAK Genel Yönetmelikler (tubitak_yonetmeligi)
+    "TÜBİTAK Araştırma Destek Programları Başkanlığı Tarafından Yürütülen Programlara İlişkin Yönetmelik.pdf": {
+        "source_document": "TÜBİTAK ARDEB Programlarına İlişkin Yönetmelik",
+        "document_type": "tubitak_yonetmeligi",
+        "program": "ARDEB",
+        "year": "2025",
+    },
+    "TÜBİTAK Bilim İnsanı Destek Programları Başkanlığı Tarafından Yürütülen Programlara İlişkin Yönetmelik.pdf": {
+        "source_document": "TÜBİTAK BİDEB Programlarına İlişkin Yönetmelik",
+        "document_type": "tubitak_yonetmeligi",
+        "program": "BİDEB",
+        "year": "2025",
+    },
+    "TÜBİTAK Teknoloji ve Yenilik Destek Programlarına İlişkin Yönetmelik.pdf": {
+        "source_document": "TÜBİTAK Teknoloji ve Yenilik Destek Programlarına İlişkin Yönetmelik",
+        "document_type": "tubitak_yonetmeligi",
+        "program": "TEYDEB",
+        "year": "2025",
+    },
+    "168 sayılı TÜBİTAK'ta Görevlendirilecek Danışman İzleyici HakemPanelist Moderatör Kurul ve Komite Üyelerine Yapılacak Ödemeler Usul ve Esaslar.pdf": {
+        "source_document": "168 sayılı TÜBİTAK Görevlendirme ve Ödemeler Usul ve Esasları",
+        "document_type": "tubitak_yonetmeligi",
+        "program": "TÜBİTAK",
+        "year": "2025",
+    },
+    # ARDEB 3005 Programı (ardeb_3005_basvuru)
+    "ARDEB 3005 Programı Başvuru Rehberi.pdf": {
+        "source_document": "3005 ARDEB Programı Başvuru Rehberi",
+        "document_type": "ardeb_3005_basvuru",
+        "program": "3005 ARDEB",
+        "year": "2025",
+    },
+    # ARDEB Hizmet Standartları & İdari Mali → mevcut tipler
+    "ARDEB Araştırma Projelerinde Uygulanacak İdari ve Mali Esaslar.pdf": {
+        "source_document": "ARDEB Araştırma Projelerinde İdari ve Mali Esaslar",
+        "document_type": "mali_esaslar",
+        "program": "ARDEB",
+        "year": "2025",
+    },
+    "ARDEB Hizmet Standartları.pdf": {
+        "source_document": "ARDEB Hizmet Standartları",
+        "document_type": "ardeb_proje_yonetmeligi",
+        "program": "ARDEB",
+        "year": "2025",
+    },
+    # TEYDEB Süreç Belgeleri (teydeb_surec)
+    "TEYDEB Hakem Değerlendirme Süreci.pdf": {
+        "source_document": "TEYDEB Hakem Değerlendirme Süreci",
+        "document_type": "teydeb_surec",
+        "program": "TEYDEB",
+        "year": "2025",
+    },
+    "TEYDEB Proje Başvuru ve Değerlendirme Süreci.pdf": {
+        "source_document": "TEYDEB Proje Başvuru ve Değerlendirme Süreci",
+        "document_type": "teydeb_surec",
+        "program": "TEYDEB",
+        "year": "2025",
+    },
+    "TEYDEB Yenilik Destek Programı Uygulama Esasları Yönergesi.pdf": {
+        "source_document": "TEYDEB Yenilik Destek Programı Uygulama Esasları Yönergesi",
+        "document_type": "teydeb_uygulama_esaslari",
+        "program": "TEYDEB",
+        "year": "2025",
+    },
+    # İtiraz Yönetmelikleri (itiraz_yonetmeligi)
+    "TÜBİTAK Tarafından Yürütülen Programların Başvuru Değerlendirme Süreçlerine Yapılacak İtirazlara İlişkin Yönetmelik .pdf": {
+        "source_document": "TÜBİTAK Başvuru Değerlendirme Süreçlerine İtirazlara İlişkin Yönetmelik",
+        "document_type": "itiraz_yonetmeligi",
+        "program": "TÜBİTAK",
+        "year": "2025",
+    },
+    "274 sayılı İtiraz Yönetmeliği Değişiklik.pdf": {
+        "source_document": "274 sayılı İtiraz Yönetmeliği Değişiklik",
+        "document_type": "itiraz_yonetmeligi",
+        "program": "TÜBİTAK",
+        "year": "2025",
+    },
+    # Ücret/Ödeme Tabloları (ucret_tablosu)
+    "HakemİzleyiciPanelist Ücret Tablosu ve Uygulanacak Kurallar TEYDEB.pdf": {
+        "source_document": "Hakem/İzleyici/Panelist Ücret Tablosu ve Kurallar (TEYDEB)",
+        "document_type": "ucret_tablosu",
+        "program": "TEYDEB",
+        "year": "2025",
+    },
+    "Yılı Ödeme Tutarı Tablosu HakemPanelist.pdf": {
+        "source_document": "Yıllık Hakem/Panelist Ödeme Tutarı Tablosu",
+        "document_type": "ucret_tablosu",
+        "program": "TÜBİTAK",
+        "year": "2025",
+    },
+    "degerlendirme_ucret_tablosu_ve_uygulanacak_kurallar.pdf": {
+        "source_document": "Değerlendirme Ücret Tablosu ve Uygulanacak Kurallar",
+        "document_type": "ucret_tablosu",
+        "program": "TÜBİTAK",
+        "year": "2025",
+    },
+    # Yapay Zeka Rehberi (yapay_zeka_rehberi)
+    "TÜBİTAK Destek Süreçlerinde Üretken Yapay Zekânın (ÜYZ) Sorumlu ve Güvenilir Kullanımı Rehberi.pdf": {
+        "source_document": "TÜBİTAK Destek Süreçlerinde Üretken Yapay Zekâ (ÜYZ) Kullanım Rehberi",
+        "document_type": "yapay_zeka_rehberi",
+        "program": "TÜBİTAK",
+        "year": "2025",
+    },
+    # TÜBİMER Kullanıcı Kılavuzu (kullanici_kilavuzu)
+    "TÜBİMER Kullanıcı Kılavuzu.pdf": {
+        "source_document": "TÜBİMER Kullanıcı Kılavuzu",
+        "document_type": "kullanici_kilavuzu",
+        "program": "TÜBİMER",
+        "year": "2025",
+    },
+    # 2202 Bilim Olimpiyatları → mevcut cagri_duyurusu tipine atanır
+    "2202 Bilim Olimpiyatları Çağrı Duyurusu.pdf": {
+        "source_document": "2202 Bilim Olimpiyatları Çağrı Duyurusu",
+        "document_type": "cagri_duyurusu",
+        "program": "2202 BİDEB",
+        "year": "2025",
+    },
 }
 
 
