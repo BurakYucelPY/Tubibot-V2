@@ -3,6 +3,14 @@ import sys
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
 
+# Windows konsolu (cp1254) bazı Türkçe NFD karakterlerini (ör. U+0308 birleştirici diaeresis)
+# basamadığı için stdout'u UTF-8'e zorla; encode hatası tüm build'i çökertmesin.
+try:
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+    sys.stderr.reconfigure(encoding="utf-8", errors="replace")
+except Exception:
+    pass
+
 from src.ingestion.pdf_loader import load_pdfs
 from src.ingestion.processor import process_and_chunk_documents
 from langchain_huggingface import HuggingFaceEmbeddings
