@@ -452,13 +452,32 @@ PDF_METADATA_MAP = {
 UNSTRUCTURED_OVERRIDES: set[str] = set()
 
 
+def _normalize_punct(text):
+    """Tipografik tırnak/apostrof varyantlarını ASCII karşılıklarına indirger.
+
+    Word/macOS dosya adları sıklıkla U+2019 (RIGHT SINGLE QUOTATION MARK) gibi
+    "akıllı" karakterler içerir; PDF_METADATA_MAP anahtarları genelde ASCII
+    apostrof (U+0027) ile yazılır. Bu yardımcı, lookup öncesi her iki tarafı
+    aynı temsile getirir.
+    """
+    return (
+        text.replace("‘", "'").replace("’", "'")
+            .replace("“", '"').replace("”", '"')
+            .replace("–", "-").replace("—", "-")
+    )
+
+
 def _get_metadata_for_file(filename):
     """Dosya adına göre metadata mapping'den bilgi döndür.
 
-    Unicode normalization farklarına (NFC/NFD) karşı dayanıklı:
-    bazı dosya adları (özellikle macOS'tan kopyalananlar) NFD biçiminde
-    olabilir; PDF_METADATA_MAP anahtarları ise NFC. Lookup hem orijinal
-    hem normalize edilmiş biçimle yapılır.
+    Sırasıyla şu eşleşme yolları denenir:
+    1. Birebir eşleşme
+    2. NFC normalize (macOS'tan gelen NFD adları için)
+    3. NFD normalize (her iki yön için simetri)
+    4. Tipografik tırnak/apostrof normalize (U+2018/2019/201C/201D → ASCII)
+
+    Bu sayede aynı görünen ama farklı Unicode kod noktası olan karakterler
+    (`'` vs `'`, `"` vs `"`) eşleşmeye engel olmaz.
     """
     if filename in PDF_METADATA_MAP:
         return PDF_METADATA_MAP[filename]
@@ -470,6 +489,12 @@ def _get_metadata_for_file(filename):
     fn_nfd = unicodedata.normalize("NFD", filename)
     for key, value in PDF_METADATA_MAP.items():
         if unicodedata.normalize("NFD", key) == fn_nfd:
+            return value
+
+    # Tipografik karakter normalize ile son bir deneme
+    fn_punct = _normalize_punct(fn_nfc)
+    for key, value in PDF_METADATA_MAP.items():
+        if _normalize_punct(unicodedata.normalize("NFC", key)) == fn_punct:
             return value
 
     print(f"[WARN] PDF_METADATA_MAP'te tanımlı değil: {filename} (fallback 'diger' kullanılacak)")
