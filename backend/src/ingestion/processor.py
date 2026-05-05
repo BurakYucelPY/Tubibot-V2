@@ -35,6 +35,18 @@ CHUNK_CONFIG = {
     "yazim_rehberi":            {"chunk_size": 800,  "chunk_overlap": 200},
     "stratejik_plan":           {"chunk_size": 1200, "chunk_overlap": 300},
     "faaliyet_raporu":          {"chunk_size": 1200, "chunk_overlap": 300},
+    # YENİ (Faz 2 — TübitakBilgi_pdf genişletmesi):
+    "etik_yonetmeligi":         {"chunk_size": 1200, "chunk_overlap": 250},  # Madde-bazlı yönetmelik
+    "etik_belgesi":             {"chunk_size": 800,  "chunk_overlap": 200},  # Kısa bilgi notu
+    "agy_kilavuzu":             {"chunk_size": 1200, "chunk_overlap": 250},  # Form bölümleri
+    "degerlendirme_formu":      {"chunk_size": 1000, "chunk_overlap": 200},  # Kriter listeleri
+    "tubitak_yonetmeligi":      {"chunk_size": 1200, "chunk_overlap": 250},  # Çerçeve yönetmelik
+    "ardeb_3005_basvuru":       {"chunk_size": 800,  "chunk_overlap": 200},
+    "teydeb_surec":             {"chunk_size": 1000, "chunk_overlap": 200},  # Süreç akış
+    "itiraz_yonetmeligi":       {"chunk_size": 1000, "chunk_overlap": 200},
+    "ucret_tablosu":            {"chunk_size": 800,  "chunk_overlap": 200},  # Tablo + kural
+    "yapay_zeka_rehberi":       {"chunk_size": 1000, "chunk_overlap": 200},
+    "kullanici_kilavuzu":       {"chunk_size": 1000, "chunk_overlap": 200},
     "default": {"chunk_size": 1000, "chunk_overlap": 200},          # Fallback
 }
 

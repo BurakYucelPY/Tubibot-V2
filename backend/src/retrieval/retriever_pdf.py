@@ -25,11 +25,34 @@ QUERY_TYPE_HINTS_PDF = {
     "yazim_rehberi":            ["özgün değer", "konunun önemi", "nasıl yazılır", "yazım rehberi"],
     "stratejik_plan":           ["stratejik plan", "2024-2028", "stratejik amaç", "stratejik hedef"],
     "faaliyet_raporu":          ["faaliyet raporu", "2025 faaliyet", "yıllık rapor"],
+    # YENİ (Faz 2):
+    "etik_yonetmeligi":         ["etik kurul", "ayek", "endek", "hadyek", "yayın etiği",
+                                 "klinik araştırma", "hayvan deneyi", "etik yönetmelik"],
+    "etik_belgesi":             ["etik onay", "etik kurul onay belgesi", "yasal izin",
+                                 "özel izin belgesi"],
+    "agy_kilavuzu":             ["agy100", "agy101", "agy200", "agy201", "agy400",
+                                 "öneri bilgileri formu", "değerlendirme raporu hazırlama",
+                                 "izleme raporu hazırlama"],
+    "degerlendirme_formu":      ["4004", "4007", "değerlendirme formu", "değerlendirme kriter",
+                                 "öneri değerlendirme raporu", "kriter açıklama"],
+    "tubitak_yonetmeligi":      ["tübitak yönetmelik", "başkanlık yönetmeliği",
+                                 "yürütülen programlar", "168 sayılı"],
+    "ardeb_3005_basvuru":       ["3005", "ardeb 3005", "sosyal ve beşeri"],
+    "teydeb_surec":             ["hakem değerlendirme süreci", "başvuru ve değerlendirme süreci",
+                                 "teydeb süreç"],
+    "itiraz_yonetmeligi":       ["itiraz", "274 sayılı", "itiraz yönetmelik",
+                                 "değerlendirmeye itiraz"],
+    "ucret_tablosu":            ["hakem ücret", "panelist ücret", "izleyici ücret",
+                                 "ödeme tutarı", "ücret tablosu"],
+    "yapay_zeka_rehberi":       ["yapay zeka", "üyz", "üretken yapay zeka",
+                                 "ai rehberi", "chatgpt", "yapay zekâ"],
+    "kullanici_kilavuzu":       ["tübimer", "kullanıcı kılavuzu", "sistem kullanımı",
+                                 "platform kılavuzu"],
 }
 
 
 def get_retriever():
-    """Ana PDF DB için hybrid retriever — 31 PDF kapsamı (2209A_pdf + TübitakBilgi_pdf).
+    """Ana PDF DB için hybrid retriever — 2209A_pdf + TübitakBilgi_pdf kapsamı.
 
     max_per_source=3: 241 sayfalık Faaliyet Raporu veya 202 sayfalık Stratejik Plan
     gibi büyük dosyaların tek bir sorguda top_k'nın tamamını ele geçirmesini önler.
