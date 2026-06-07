@@ -134,12 +134,15 @@ export function SidebarHistory({ user }: { user: User | undefined }) {
 
   const handleDelete = () => {
     const chatToDelete = deleteId;
-    const isCurrentChat = pathname === `/chat/${chatToDelete}`;
+    const isCurrentDefaultChat = pathname === `/chat/${chatToDelete}`;
+    const isCurrentGundemChat = pathname === `/gundem-sor/${chatToDelete}`;
 
     setShowDeleteDialog(false);
 
-    if (isCurrentChat) {
-      router.replace("/");
+    if (isCurrentDefaultChat) {
+      router.replace("/chat");
+    } else if (isCurrentGundemChat) {
+      router.replace("/gundem-sor");
     }
 
     mutate((chatHistories) => {
