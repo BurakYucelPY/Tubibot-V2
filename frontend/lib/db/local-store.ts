@@ -51,11 +51,10 @@ async function readFromDisk(): Promise<StoreShape> {
 }
 
 export async function loadStore(): Promise<StoreShape> {
-  if (cache) {
-    return cache;
-  }
-  cache = await readFromDisk();
-  return cache;
+  // Cache devre dışı: Next.js dev modunda modül seviyesindeki cache HMR/worker
+  // izolasyonu nedeniyle diskten kopabiliyor. Dosya küçük olduğu için her
+  // çağrıda diskten okumak güvenli ve gözle görülür performans maliyeti yok.
+  return await readFromDisk();
 }
 
 async function writeToDisk(data: StoreShape): Promise<void> {
@@ -77,16 +76,31 @@ export async function saveStore(data: StoreShape): Promise<void> {
   await writeQueue;
 }
 
+const mutationLock = { promise: Promise.resolve() as Promise<unknown> };
+
 export async function mutateStore<T>(
   fn: (store: StoreShape) => { store: StoreShape; result: T }
 ): Promise<T> {
-  const current = await loadStore();
-  const { store: next, result } = fn({
-    chats: [...current.chats],
-    messages: [...current.messages],
+  // Eş zamanlı mutasyonların birbirini ezmesini önlemek için kuyruk üzerinden
+  // sırala. loadStore her seferinde diskten okuduğu için okuma-değiştirme-yazma
+  // döngüsünün atomik kalmasi gerekiyor.
+  const previous = mutationLock.promise;
+  let resolve!: () => void;
+  mutationLock.promise = new Promise<void>((r) => {
+    resolve = r;
   });
-  await saveStore(next);
-  return result;
+  try {
+    await previous;
+    const current = await loadStore();
+    const { store: next, result } = fn({
+      chats: [...current.chats],
+      messages: [...current.messages],
+    });
+    await saveStore(next);
+    return result;
+  } finally {
+    resolve();
+  }
 }
 
 export function chatToDomain(row: StoredChat) {
