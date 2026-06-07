@@ -144,22 +144,30 @@ export async function POST(request: Request) {
         }
       }
 
-      writer.write({ type: "text-end", id: partId });
-
-      if (accumulated) {
-        await saveMessages({
-          messages: [
-            {
-              id: assistantId,
-              chatId,
-              role: "assistant",
-              parts: [{ type: "text", text: accumulated }],
-              attachments: [],
-              createdAt: new Date(),
-            },
-          ],
+      if (!accumulated) {
+        accumulated =
+          "Yanıt alınamadı. Sunucu beklenmedik şekilde bağlantıyı kapattı, lütfen tekrar deneyin.";
+        writer.write({
+          type: "text-delta",
+          id: partId,
+          delta: accumulated,
         });
       }
+
+      writer.write({ type: "text-end", id: partId });
+
+      await saveMessages({
+        messages: [
+          {
+            id: assistantId,
+            chatId,
+            role: "assistant",
+            parts: [{ type: "text", text: accumulated }],
+            attachments: [],
+            createdAt: new Date(),
+          },
+        ],
+      });
     },
     generateId: generateUUID,
   });
