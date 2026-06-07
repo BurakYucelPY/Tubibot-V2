@@ -84,11 +84,11 @@ export function SidebarUserNav({ user }: { user: User }) {
                 className="h-8 px-2 rounded-lg bg-transparent text-sidebar-foreground/70 transition-colors duration-150 hover:text-sidebar-foreground data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
                 data-testid="user-nav-button"
               >
-                <div
-                  className="size-5 shrink-0 rounded-full ring-1 ring-sidebar-border/50"
-                  style={{
-                    background: `linear-gradient(135deg, oklch(0.35 0.08 ${emailToHue(user.email ?? "")}), oklch(0.25 0.05 ${emailToHue(user.email ?? "") + 40}))`,
-                  }}
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src="/logoTubi-Photoroom.webp"
+                  alt="Tübibot"
+                  className="size-5 shrink-0 rounded-full ring-1 ring-sidebar-border/50 object-cover"
                 />
                 <span className="truncate text-[13px]" data-testid="user-email">
                   {isGuest ? "Misafir" : user?.email}
