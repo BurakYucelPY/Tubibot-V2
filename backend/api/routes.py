@@ -52,13 +52,16 @@ async def chat(request: ChatRequest):
     response_chain = RAG_PROMPT | selected_llm
 
     async def generate():
-        for chunk in response_chain.stream({
-            "context": context,
-            "question": raw_question,
-        }):
-            if hasattr(chunk, "content") and chunk.content:
-                yield chunk.content
-                await asyncio.sleep(0)
+        try:
+            for chunk in response_chain.stream({
+                "context": context,
+                "question": raw_question,
+            }):
+                if hasattr(chunk, "content") and chunk.content:
+                    yield chunk.content
+                    await asyncio.sleep(0)
+        except Exception as e:
+            yield _friendly_llm_error(e)
 
     return StreamingResponse(
         generate(),
@@ -68,6 +71,21 @@ async def chat(request: ChatRequest):
             "X-Content-Type-Options": "nosniff",
         },
     )
+
+
+def _friendly_llm_error(exc: Exception) -> str:
+    msg = str(exc)
+    if "rate_limit_exceeded" in msg or "Request too large" in msg or "Error code: 413" in msg:
+        return (
+            "Bu soru için seçtiğiniz modelin token limiti aşıldı. "
+            "Lütfen daha kısa bir soru deneyin veya sol alttaki model seçicisinden "
+            "Llama 3.3 70B modeline geçin."
+        )
+    if "rate_limit" in msg.lower() or "Error code: 429" in msg:
+        return (
+            "Modele çok sık istek gönderildi. Lütfen birkaç saniye bekleyip tekrar deneyin."
+        )
+    return f"Modelden yanıt alınırken bir hata oluştu. Lütfen tekrar deneyin. (Detay: {msg[:200]})"
 
 
 # ====================================================================
@@ -99,13 +117,16 @@ async def chat_gundem(request: ChatRequest):
     response_chain = GUNDEM_PROMPT | selected_llm
 
     async def generate():
-        for chunk in response_chain.stream({
-            "context": context,
-            "question": raw_question,
-        }):
-            if hasattr(chunk, "content") and chunk.content:
-                yield chunk.content
-                await asyncio.sleep(0)
+        try:
+            for chunk in response_chain.stream({
+                "context": context,
+                "question": raw_question,
+            }):
+                if hasattr(chunk, "content") and chunk.content:
+                    yield chunk.content
+                    await asyncio.sleep(0)
+        except Exception as e:
+            yield _friendly_llm_error(e)
 
     return StreamingResponse(
         generate(),
