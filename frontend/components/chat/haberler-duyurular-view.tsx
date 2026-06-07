@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import {
   ChevronLeftIcon,
   ChevronRightIcon,
@@ -122,19 +123,10 @@ export function HaberlerDuyurularView() {
   };
 
   return (
-    <div className="relative z-1 flex-1 overflow-y-auto pt-8 pb-16 sm:pt-10 sm:pb-20">
-      <div className="mx-auto max-w-7xl px-6 lg:px-8">
-        <div className="mx-auto flex max-w-2xl flex-col items-center">
-          <h2 className="text-center font-semibold text-2xl tracking-tight text-foreground md:text-3xl">
-            Haberler ve Duyurular
-          </h2>
-          <p className="mt-3 text-center text-muted-foreground/80 text-sm">
-            TÜBİTAK gündeminden seçilmiş son haberler ve duyurular.
-          </p>
-        </div>
-
-        {/* Güncelle Butonu + Filtreler */}
-        <div className="mx-auto mt-6 flex max-w-2xl flex-col gap-4 lg:mx-0 lg:max-w-none lg:flex-row lg:items-center lg:justify-between">
+    <div className="relative z-1 flex-1 overflow-y-auto pb-16 sm:pb-20">
+      {/* Üst Şerit: Güncelle Butonu (sol) + Filtreler (sağ) — sticky siyah bar */}
+      <div className="sticky top-0 z-10 bg-sidebar px-6 py-3 lg:px-8">
+        <div className="mx-auto flex max-w-7xl flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex flex-col items-start">
             <button
               type="button"
@@ -178,6 +170,17 @@ export function HaberlerDuyurularView() {
               </button>
             ))}
           </div>
+        </div>
+      </div>
+
+      <div className="mx-auto max-w-7xl px-6 pt-10 sm:pt-12 lg:px-8">
+        <div className="mx-auto flex max-w-2xl flex-col items-center">
+          <h2 className="text-center font-semibold text-2xl tracking-tight text-foreground md:text-3xl">
+            Haberler ve Duyurular
+          </h2>
+          <p className="mt-3 text-center text-muted-foreground/80 text-sm">
+            TÜBİTAK gündeminden seçilmiş son haberler ve duyurular.
+          </p>
         </div>
 
         {/* Loading State */}
